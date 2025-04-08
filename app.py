@@ -58,7 +58,8 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fleet Sustainability View</title>
+    <title>SustainaBOS</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <style>
         body { font-family: Arial, sans-serif; background-color: #E8F5E9; margin: 0; padding: 0; }
         .container { width: 80%; margin: auto; overflow: hidden; }
@@ -100,18 +101,20 @@ html_template = """
         tr:hover {
         background-color: #ddd;
         }
+
         @keyframes glow {
             0% {
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             }
             50% {
-            box-shadow: 0 0 30px rgba(0, 255, 0, 1);
-            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 1);
+            transform: scale(1.05);
             }
             100% {
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             }
             }
+
         #fab-button {
            position: fixed;
            bottom: 20px;
@@ -119,8 +122,8 @@ html_template = """
            background-color: #ffffff;
            border-radius: 50%;
            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-           height: 60px;
-           width: 60px;
+           height: 70px;
+           width: 70px;
            display: flex;
            justify-content: center;
            align-items: center;
@@ -128,14 +131,17 @@ html_template = """
            transition: transform 0.3s ease;
            animation: glow 1.5s ease-in-out infinite alternate;
            }
+
         #fab-button:hover {
-           transform: scale(1.1);
+           transform: scale(1.05);
            }
+
         #fab-button img {
-           height: 36px;
-           width: 36px;
+           height: 40px;
+           width: 40px;
            object-fit: contain;
            }
+
         #splash {
            position: fixed;
            top: 0;
@@ -148,9 +154,10 @@ html_template = """
            justify-content: center;
            align-items: center;
            z-index: 9999;
-           animation: fadeOut 2s ease 1 forwards;
-           animation-delay: 1s;
+           animation: fadeOut 1s ease 1 forwards;
+           animation-delay: 1.5s;
         }
+
         #splash-title {
             font-size: 46px;
             font-weight: bold;
@@ -158,20 +165,24 @@ html_template = """
             justify-content: center;
             align-items: center;
             animation: slideLeft 1s ease 1 forwards;
-            animation-delay: 1s; 
+            animation-delay: 1.5s; 
             margin-top: 20px; /* Adds space between the logo and the title */
             }
+
             .green {
                color: green;
             }
+
             .purple {
                  color: purple;
             }
+
         #splash-logo {
            height: 140px;
            animation: slideLeft 1s ease 1 forwards;
-           animation-delay: 1s;
+           animation-delay: 1.5s;
         }
+
         @keyframes slideLeft {
           0% {
               transform: translateX(0);
@@ -182,12 +193,14 @@ html_template = """
               opacity: 0;
           }
         }
+
          @keyframes fadeOut {
            to {
               opacity: 0;
               visibility: hidden;
               }
          }
+
          
     </style>
     <script>
@@ -201,6 +214,7 @@ html_template = """
                 element.classList.add('hidden');
             }
         }
+
         function showSection(sectionId) {
             var sections = document.getElementsByClassName('section');
             for (var i = 0; i < sections.length; i++) {
@@ -208,23 +222,28 @@ html_template = """
             }
             document.getElementById(sectionId).style.display = 'block';
         }
+
         function addDevice() {
         console.log("Add Device button clicked");
         currentAction = "addDevice"; // Store the action type
         showVesselSelector();
         }
+
         function modifyStatus() {
         console.log("Modify Status button clicked");
         currentAction = "modifyStatus"; // Store the action type
         showVesselSelector();
         }
+
         function showVesselSelector() {
         const vesselSelector = document.getElementById('vesselSelector');
         vesselSelector.style.display = 'block';
         }
+
         function confirmVesselSelection() {
            const selectedVessel = document.getElementById('vesselDropdown').value;
            console.log("Selected Vessel: " + selectedVessel);
+
            // Check the action type and prompt accordingly
            if (currentAction === "addDevice") {
         
@@ -257,9 +276,11 @@ html_template = """
         <span class="green">Sustaina</span><span class="purple">BOS</span>
     </div>
     </div>
+
     <a href="javascript:void(0);" id="fab-button" title="Reload Page">
     <img src="{{ url_for('static', filename='green_leaf.png') }}" alt="FAB Logo">
     </a>
+
     <header>
       <div class="container">
         <div id="branding">
@@ -278,6 +299,7 @@ html_template = """
         </nav>
       </div>
     </header>
+
     <div class="container">
       <div id="welcome" class="section content">
           <h2>Welcome</h2>
@@ -298,6 +320,7 @@ For more information, please contact Axel Faurax directly (see contact section).
               <tr>
                   {% for col_index in range(row.size) %}
                   {% set value = row.iloc[col_index] %}
+
                   {% if col_index == 1 and index == 0 %}
                   <td style="font-weight: bold; color: green;">
                       {{ "{:,.2f} $".format(value|float|int) }}
@@ -315,6 +338,7 @@ For more information, please contact Axel Faurax directly (see contact section).
           <img src="{{ url_for('static', filename='view2.png') }}"      alt="ESG" style="height:400px; display: block; margin: auto;">
           <h3>Green News :</h3>
           <p> <b> BOS Princess: Successfully Converted Into Geotechnical Drilling Vessel </b> 🛠 <br> <br>
+
           We are pleased to announce the successful conversion of the BOS Princess from a Platform Supply Vessel              (PSV) into a Geotechnical Drilling Vessel, enhancing our capabilities in support of the offshore wind industry.
           <br> <br>
           As part of this transformation, Besiktas Shipyard carried out a Moon Pool opening, Rig Tower, and A-frame installation to enhance BOS Princess’ geotechnical support capabilities. Additionally, the vessel also underwent an Azimuth Thruster maintenance and a comprehensive overhaul to ensure optimal performance in demanding offshore conditions.
@@ -322,16 +346,22 @@ For more information, please contact Axel Faurax directly (see contact section).
           With these upgrades, BOS Princess will provide a stable and efficient platform for Seas Geosciences’ geotechnical investigations, further strengthening our commitment to advancing offshore wind energy. </p>
           <br> <br>
           <img src="{{ url_for('static', filename='Princess.jpeg') }}"      alt="Princess" style="height:600px; display: block; margin: auto;">
+
       <br>
+
       <h2><span class="green">Sustaina</span><span class="purple">BOS</span> </h2>
       Powered by Axel FAURAX and Technical Department.
+
       </div>
+
       <div id="list" class="section content hidden">
+
           <div style="margin-bottom: 20px;">
              <button onclick="addDevice()" style="margin-right: 10px; font-size: 18px; padding: 10px 20px; color: purple;">+ Add Devices</button>
              <button onclick="modifyStatus()" style="margin-right: 10px; font-size: 18px; padding: 10px 20px; color: purple;">Modify Status</button>
              <button onclick="modifyStatus()" style="font-size: 18px; padding: 10px 20px; color: purple;">Show Vessel</button>
           </div>
+
           <div id="vesselSelector" style="margin-top: 20px; display: none;">
              <label for="vesselDropdown" style="font-size: 18px; color: purple;">Which vessel?</label>
              <select id="vesselDropdown" style="font-size: 16px; padding: 5px 10px; margin-left: 10px;">
@@ -341,9 +371,12 @@ For more information, please contact Axel Faurax directly (see contact section).
              </select>
              <button onclick="confirmVesselSelection()" style="font-size: 18px; padding: 10px 20px; color: purple; margin-top: 10px;">Ok</button>
           </div>
+
           <br>
+
           <h3>New Initiatives - Look</h3>
           <img src="{{ url_for('static', filename='initiatives1.png') }}"      alt="ini" style="height:300px; display: block; margin: auto;">
+
           <h3>Summary Track Sheet</h3>
           <table>
               {% for index, row in summary_df.iterrows() %}
@@ -368,6 +401,7 @@ For more information, please contact Axel Faurax directly (see contact section).
               </tr>
               {% endfor %}
           </table>
+
           <br>
           <h3>List of Vessels and Their Devices</h3>
           <p> Only installed devices or installation in process are displayed. You can see the 67 vessels name however </p>
@@ -375,6 +409,7 @@ For more information, please contact Axel Faurax directly (see contact section).
              {% for index, row in list_df.iterrows() %}
              {% set col_4_value = row[3] | string %}
              {% set col_5_value = row[4] | string %}
+
              {% if index == 0 or col_5_value in ["Done", "In Process"] or col_4_value == "↓" %}
              <tr>
                  {% for col_index in range(row.size) %}
@@ -423,16 +458,20 @@ For more information, please contact Axel Faurax directly (see contact section).
           </table>
           {% endfor %}
       </div>
+
       <div id="analytics" class="section content hidden">
           <h2>Analytics</h2>
+
           <h3>Introduction</h3>
           <table>
               {% for index, row in summary3_df.iterrows() %}
               <tr>
                   {% for col_index in range(row.size) %}
                   {% set value = row.iloc[col_index] %}
+
                   {% if col_index == 0 or index == 0 %}
                   <td>{{ value }}</td>
+
                   {% elif col_index == 1 and index == 1 %}
                   <td style="font-weight: bold; color: orange;">
                       {{ (value * 100) | int}}%
@@ -449,6 +488,8 @@ For more information, please contact Axel Faurax directly (see contact section).
               </tr>
               {% endfor %}
           </table>
+
+
           <h3>Top 10 Vessels with Best Performance</h3>
           <div style="display: flex; justify-content: center; gap: 20px;">
               <img src="{{ url_for('static', filename='top_vessels_chartEX.png') }}" alt="Top 10 Vessels Chart" width="450">
@@ -459,24 +500,33 @@ For more information, please contact Axel Faurax directly (see contact section).
               <img src="{{ url_for('static', filename='top_region_chartEX.png') }}" alt="Savings by Region - 3 Offices" width="450">
               <img src="{{ url_for('static', filename='top_region_chartEX2.png') }}" alt="Savings by Region - Average by Vessel" width="450">
           </div>
+
           <h3>Savings by Devices - Initiatives</h3>
           <div style="display: flex; justify-content: center; gap: 20px;">
              <img src="{{ url_for('static', filename='top_device_chartEX.png') }}" alt="Cost Savings by Devices - Initiatives" width="450">
              <img src="{{ url_for('static', filename='top_device_chartEX2.png') }}" alt="CO2 Savings by Devices - Initiatives " width="450">
           </div>
+
           <h3>Track progress bars</h3>
           <div style="display: flex; justify-content: center; gap: 20px;">
              <img src="{{ url_for('static', filename='track_chartEX.png') }}" alt="Track" width="450">
              <img src="{{ url_for('static', filename='track_chartEX2.png') }}" alt="Track" width="450">
+
           </div>
           <br>
+
           <h3>Overdue Jobs - Statistics for PMS</h3>
           <p> Besides Sustainability, I'm also doing statistics for our overdue jobs and critical spare parts. Our PMS expert is doing calculations for KPI every months. I collected data and made some graphs in another tool. Here I will just put the top and worst vessels in terms of overdue jobs, to compare and be considered with previous score charts. </p> <br><br>
           <div style="display: flex; justify-content: center; gap: 20px;">
              <img src="{{ url_for('static', filename='OJ_worstEX.png') }}" alt="Track" width="450">
              <img src="{{ url_for('static', filename='OJ_worstEX2.png') }}" alt="Track" width="450">
+
           </div>
+
+
+
       </div>
+
       <div id="contact" class="section content hidden">
           <h2>Contact</h2>
           <p>Name: Axel Faurax</p>
@@ -493,6 +543,8 @@ For more information, please contact Axel Faurax directly (see contact section).
           </div>
        
       </div>
+
+
     </div>
     <footer style="background-color: #333; color: #fff; padding: 20px 0; margin-top: 40px;">
        <div class="container" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
@@ -504,6 +556,7 @@ For more information, please contact Axel Faurax directly (see contact section).
          </p>
        </div>
     </footer>
+
    <!-- JavaScript for splash animation -->
    <script>
       setTimeout(function () {
