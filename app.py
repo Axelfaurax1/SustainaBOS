@@ -66,7 +66,7 @@ html_template = """
         header { background: #D0E8D0; color: #800080; padding-top: 20px; min-height: auto; border-bottom: #800080 2px solid; }
         header a { color: #800080; text-decoration: none; text-transform: none; font-size: 16px; font-weight: bold;}
         header ul { padding: 0; list-style: none; }
-        header li { display: inline; padding: 0 10px 0 10px; }
+        header li { display: inline; padding: 0 10px 0 20px; }
         header #branding { float: left; }
         header #branding h1 { font-size: 19px; }
         header nav { float: right; margin-top: 10px; }
@@ -201,6 +201,13 @@ html_template = """
               }
          }
 
+         .active-nav {
+            color: green;
+            font-weight: bold;
+            font-size: 1.2em;  /* <--- this line increases the font size */
+
+         }
+
          
     </style>
     <script>
@@ -217,10 +224,39 @@ html_template = """
 
         function showSection(sectionId) {
             var sections = document.getElementsByClassName('section');
+            var navItems = document.querySelectorAll('a[id^="nav-"]');  
+            // selects all nav items by id
+            console.log("Sections found:", sections);
             for (var i = 0; i < sections.length; i++) {
                 sections[i].style.display = 'none';
             }
+
+            // Remove highlight from all nav items
+                navItems.forEach(item => {
+        item.classList.remove('active-nav');
+                // Optional: remove any icons previously added
+                var icon = item.querySelector('img');
+                if (icon) item.removeChild(icon);
+            });
+
+            
+
+
             document.getElementById(sectionId).style.display = 'block';
+
+            // Add highlight or icon to active section
+            var activeNav = document.getElementById('nav-' + sectionId);
+            activeNav.classList.add('active-nav');
+
+            // Add green_leaf icon
+            let leaf = document.createElement('img');
+            leaf.src = '/static/green_leaf.png';  // adjust path if needed
+            leaf.alt = 'leaf';
+            leaf.style.height = '16px';
+            leaf.style.marginLeft = '5px';
+            activeNav.appendChild(leaf);
+
+
         }
 
         function addDevice() {
@@ -291,10 +327,11 @@ html_template = """
         </div>
         <nav>
           <ul>
-            <li><a href="#" onclick="showSection('welcome')">Home</a></li>
-            <li><a href="#" onclick="showSection('list')">List</a></li>
-            <li><a href="#" onclick="showSection('analytics')">Analytics</a></li>
-            <li><a href="#" onclick="showSection('contact')">Contact</a></li>
+            <li><a id="nav-welcome" href="#" onclick="showSection('welcome')">Home</a></li>
+            <li><a id="nav-list" href="#" onclick="showSection('list')">List</a></li>
+            <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">Analytics</a></li>
+            <li><a id="nav-report" href="#" onclick="showSection('report')">Report</a></li>
+            <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
           </ul>
         </nav>
       </div>
@@ -527,6 +564,18 @@ For more information, please contact Axel Faurax directly (see contact section).
 
       </div>
 
+      <div id="report" class="section content hidden">
+         <h2>Sustainability Report 2024</h2>
+         Here is the sustainabilty report of 2024. I hope this new website could be involve in the next Sustainability Report 2025. Or help to do it. Here is the PDF display. <br> <br> 
+         <iframe src="{{ url_for('static', filename='Report2024.pdf') }}" width="100%" height="600px">
+         <!-- This browser does not support PDFs. Please download the PDF to view it: 
+             <a href="{{ url_for('static', filename='Report2024.pdf') }}">Download PDF</a> -->
+             
+         </iframe>
+         <h2>Sustainability Report 2025</h2>
+         To come
+      </div>
+
       <div id="contact" class="section content hidden">
           <h2>Contact</h2>
           <p>Name: Axel Faurax</p>
@@ -565,8 +614,13 @@ For more information, please contact Axel Faurax directly (see contact section).
       document.getElementById("fab-button").addEventListener("click", function() {
             location.reload(); // Reloads the current page
         });
+  
+   window.onload = function() {
+            showSection('welcome');
+        };
    </script>
-</body>
+
+   </body>
 </html>
 """
 
