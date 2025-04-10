@@ -552,7 +552,7 @@ For more information, please contact Axel Faurax directly (see contact section).
                   {% elif loop.last %}
                   <td>
                      {% if value is number %}
-                     <span style="color: {% if value >= 0.50 %}green{% elif value >= 0.15 and value < 0.50 %}orange{% else %}red{% endif %}; font-weight: bold;"> 
+                     <span style="color: {% if value >= 0.505 %}green{% elif value >= 0.20 and value < 0.505 %}orange{% else %}red{% endif %}; font-weight: bold;"> 
                         {{ (value * 100) | round(0) }}%
                      </span>
                      {% else %}
