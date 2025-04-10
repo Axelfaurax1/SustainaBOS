@@ -1,13 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
+
+# Create a Flask app
+app = Flask(__name__)
+
 
 # Load the Excel file with specified column names starting from row 8 and column B
 file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=399, usecols="B:I")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=399, usecols="B:J")
 
 # Load the summary sheet
 summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=11, usecols="A:E")
@@ -16,8 +20,66 @@ summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', 
 
 summary3_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=4, usecols="I:K")
 
+def get_vessel_summary(vessel_name):
+
+    #print(list_df.iloc[:, 1])
+   
+    # Find the row index where vessel_name appears in column A
+    start_idx = list_df[list_df.iloc[:, 1] == vessel_name].index
+    if len(start_idx) == 0:
+        return None  # Vessel not found
+
+    #print(start_idx)
+
+    start = start_idx[0]  # First occurrence
+    end = start + 1
+
+    # Loop to find the next non-empty cell in column A
+    while end < len(list_df) and pd.isna(list_df.iloc[end, 0]):
+        end += 1
+
+    # Extract the relevant part of the DataFrame
+    summaryBIS_df = list_df.iloc[start:end].copy()
+    #print(summaryBIS_df)
+    return summaryBIS_df
+
+@app.route('/get_vessel_summary', methods=['POST'])
+def get_vessel_summary_route():
+    vessel_name = request.json.get('vesselName')
+    summaryBIS_df = get_vessel_summary(vessel_name)
+
+    # Replace NaNs with empty strings
+    summaryBIS_df = summaryBIS_df.fillna('')
+    #print(summaryBIS_df)
+
+    # Remove unnamed columns (those usually from index column)
+    column_names2 = [
+        'N',
+        'Vessel Name/ ID',
+        'Spec',
+        'Devices',
+        'Installation Status',
+        'Date of Installation',
+        'Savings/year (fuel efficiency)',
+        'Savings/year (Maitenance)',
+        'Co2 savings ton/year' ]
+    summaryBIS_df.columns = column_names2
+
+    # Return as clean HTML
+    return summaryBIS_df.to_html(index=False, classes='table table-bordered table-striped', border=0)
+
+#summaryBIS_df = get_vessel_summary("Britoil 80")
+#print(summaryBIS_df)
+#M=summaryBIS_df.dropna().tolist()
+#print(M)
+
 # Load the list of vessel
 listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=19,  nrows=68, usecols="A")
+
+# Load the list of devices
+listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=10, usecols="A")
+#print(listdevice_df)
+
 
        # vessel_names = listvessel_df.dropna().tolist()
 # print(listvessel_df)
@@ -50,8 +112,6 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('static/top_vessels_chart.png')
 
-# Create a Flask app
-app = Flask(__name__)
 
 # HTML template for the website with improved design and images
 html_template = """
@@ -208,6 +268,17 @@ html_template = """
 
          }
 
+         .report-section ul li a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 600;
+          }
+
+         .report-section ul li a:hover {
+            text-decoration: underline;
+            color: #0056b3;
+         }
+
          
     </style>
     <script>
@@ -271,10 +342,33 @@ html_template = """
         showVesselSelector();
         }
 
+        function showVessel() {
+        console.log("Show Vessel button clicked");
+        currentAction = "showVessel"; // Store the action type
+        showVesselSelector();
+        }
+
+        function showDevice() {
+        console.log("Show Device button clicked");
+        currentAction = "showDessel"; // Store the action type
+        showDeviceSelector();
+        }
+
+
         function showVesselSelector() {
         const vesselSelector = document.getElementById('vesselSelector');
         vesselSelector.style.display = 'block';
         }
+
+        function showDeviceSelector() {
+        const deviceSelector = document.getElementById('deviceSelector');
+        deviceSelector.style.display = 'block';
+        }
+
+        function confirmDeviceSelection() {
+               alert("Status is required.");
+               }
+
 
         function confirmVesselSelection() {
            const selectedVessel = document.getElementById('vesselDropdown').value;
@@ -301,7 +395,23 @@ html_template = """
                } else {
                   alert("Status is required.");
                }
-           }
+           } else if (currentAction === "showVessel") {
+               // 👇 Call Flask backend to get vessel summary
+               fetch('/get_vessel_summary', {
+                   method: 'POST',
+                   headers: {
+                      'Content-Type': 'application/json'
+                   },
+                   body: JSON.stringify({ vesselName: selectedVessel })
+               })
+               .then(response => response.text())
+               .then(html => {
+                  document.getElementById('vesselSummaryDisplay').innerHTML = html;
+               })
+               .catch(error => {
+                  console.error('Error fetching vessel summary:', error);
+               });
+            }
         }
     </script>
 </head>
@@ -394,10 +504,14 @@ For more information, please contact Axel Faurax directly (see contact section).
       <div id="list" class="section content hidden">
 
           <div style="margin-bottom: 20px;">
-             <button onclick="addDevice()" style="margin-right: 10px; font-size: 18px; padding: 10px 20px; color: purple;">+ Add Devices</button>
-             <button onclick="modifyStatus()" style="margin-right: 10px; font-size: 18px; padding: 10px 20px; color: purple;">Modify Status</button>
-             <button onclick="modifyStatus()" style="font-size: 18px; padding: 10px 20px; color: purple;">Show Vessel</button>
+             <button onclick="showVessel()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Vessel</button>
+             <button onclick="showDevice()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Device</button>
+             <button onclick="addDevice()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">+ Add Devices</button>
+             <button onclick="modifyStatus()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Modify Status</button>
+             
           </div>
+
+          <!--  This section is for doing the dropdown menu for vessels and devices, once button click -->
 
           <div id="vesselSelector" style="margin-top: 20px; display: none;">
              <label for="vesselDropdown" style="font-size: 18px; color: purple;">Which vessel?</label>
@@ -408,6 +522,20 @@ For more information, please contact Axel Faurax directly (see contact section).
              </select>
              <button onclick="confirmVesselSelection()" style="font-size: 18px; padding: 10px 20px; color: purple; margin-top: 10px;">Ok</button>
           </div>
+
+          <div id="deviceSelector" style="margin-top: 20px; display: none;">
+             <label for="vesselDropdown" style="font-size: 18px; color: purple;">Which Device?</label>
+             <select id="vesselDropdown" style="font-size: 16px; padding: 5px 10px; margin-left: 10px;">
+                {% for device in listdevice_df['Device'] %}
+                    <option value="{{ device }}">{{ device }}</option>
+                {% endfor %}
+             </select>
+             <button onclick="confirmDeviceSelection()" style="font-size: 18px; padding: 10px 20px; color: purple; margin-top: 10px;">Ok</button>
+          </div>
+
+
+          <!--  This is where the summary table will appear -->
+          <div id="vesselSummaryDisplay" style="margin-top: 20px;"></div>
 
           <br>
 
@@ -455,13 +583,14 @@ For more information, please contact Axel Faurax directly (see contact section).
                  <td style="font-weight: bold;">{{ value }}</td>
                  {% elif value == "" or value == "nan" or value is none %}
                  <td></td>
-                 {% elif col_index in [6, 7, 8] %}
+                 {% elif col_index in [6, 7, 8] and col_5_value == "Done" %}
                  <td style="color: green;">
                     {% if value == "nan" or value is none %}
                     <!-- Display empty cell for "nan" values -->
                     {{ "" }}
                     {% else %}
-                    {{ value | int | replace('0', '')}}
+                    <!-- {{ value | int | replace('0', '')}} On peut essayer ca --> 
+                    {{ value | int }}
                     {% endif %}
                  </td>
                  {% else %}
@@ -565,15 +694,43 @@ For more information, please contact Axel Faurax directly (see contact section).
       </div>
 
       <div id="report" class="section content hidden">
-         <h2>Sustainability Report 2024</h2>
+         <h2>All Documents</h2>
+         <br>
+         <h3>Sustainability Report 2024</h3>
          Here is the sustainabilty report of 2024. I hope this new website could be involve in the next Sustainability Report 2025. Or help to do it. Here is the PDF display. <br> <br> 
          <iframe src="{{ url_for('static', filename='Report2024.pdf') }}" width="100%" height="600px">
          <!-- This browser does not support PDFs. Please download the PDF to view it: 
              <a href="{{ url_for('static', filename='Report2024.pdf') }}">Download PDF</a> -->
              
          </iframe>
-         <h2>Sustainability Report 2025</h2>
+
+         
+         <h3>Sustainability Report 2025</h3>
          To come
+         
+         <div class="report-section" style="margin-top: 30px;">
+           <h3>📄 Reports & Studies</h3>
+             <ul style="list-style-type: none; padding-left: 20; margin:0;">
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EevaaGdd2I9Fix-ihhTTSpUBCljoFEfPWiLaBlCzBlQ3GA?e=wboRxn" target="_blank">🔗 LED Light Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EYadKUz1ndFGjab-1unbFBkB0diXBP36hvg2i0Bw240Ysg?e=UkaSer" target="_blank">🔗 MGPS Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/ERMqIzIiewBClWQiLKocjN8BdIuo2Ks6AVInt9oKMa-LZQ?e=dgdPCi" target="_blank">🔗 EFMS Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ea132zQliBVAu4Gc_H4ZSZcBzIcYKu7CWsLZGsyiaSCX5A?e=mqJhyx" target="_blank">🔗 IWTM Filters Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ee3lqUA0Cl5ApvCfcGaexv0BIv881MnJPRGPFBxgYCMPjw?e=oFyS5x" target="_blank">🔗 New Initiatives Presentation – Dubai 2024</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/EXAFSkLNyppFtbHGKCwqRyABAuUzok_kEdlRdhw-UxKoLQ?e=gyBv4R" target="_blank">🔗 New Initiatives 2025</a></li>
+             </ul>
+         </div>
+
+         <div class="report-section" style="margin-top: 30px;">
+           <h3>📄 DataBases and Excel Calculators</h3>
+             <ul style="list-style-type: none; padding-left: 20; margin:0;">
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EXZ7myRyuexAri5Js-87reoBeA3TxCLpgfgyekdnVSQmKA?e=PTs9uV" target="_blank">🔗 Vessel Device Installation Tracker NV </a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EQwx2EWZCXhAkbaYgAyU8m8BCQcuYDoLcgX-vqmrKRUB7A?e=z7UHyz" target="_blank">🔗 PMS Overdue and Postponed Stats</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EbraJof6RRBDoBNT21B5GfIBB6dHv0MeZgx1-TTFOd4Yjw?e=NoQYfs" target="_blank">🔗 LED Calculator Fuel Savings</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EdryQRnsByRBixSnoQ_ZXNsBnB0eH28l9cH-BKUAwuoUPg?e=rqAUOa" target="_blank">🔗 Digital Ocean Status - ERP Initiative</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos.sharepoint.com/:x:/s/Vessel-Library/EaRKrfVxnlJJsfd4XfiBLMMBm_Lxe9rzRnr_yZCzpoyxbg?e=xWa4lc" target="_blank">🔗 Britoil Technical Plan 2025 Updated</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EeWlQm_l4LdGs1upPr4iw4oBy6GCABXPjHGxHwZQAQ5WCA?e=52IO9C" target="_blank">🔗 IWTM Samples Data & Analysis Britoil 121 (ex)</a></li>
+             </ul>
+         </div>
       </div>
 
       <div id="contact" class="section content hidden">
@@ -626,7 +783,7 @@ For more information, please contact Axel Faurax directly (see contact section).
 
 @app.route('/')
 def index():
-    return render_template_string(html_template, vessel_devices=vessel_devices, list_df=list_df, summary_df=summary_df, summary2_df=summary2_df, summary3_df=summary3_df, listvessel_df=listvessel_df)
+    return render_template_string(html_template, vessel_devices=vessel_devices, list_df=list_df, summary_df=summary_df, summary2_df=summary2_df, summary3_df=summary3_df, listvessel_df=listvessel_df,listdevice_df=listdevice_df)
 
 if __name__ == '__main__':
     app.run(debug=True)
