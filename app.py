@@ -68,6 +68,73 @@ def get_vessel_summary_route():
     # Return as clean HTML
     return summaryBIS_df.to_html(index=False, classes='table table-bordered table-striped', border=0)
 
+def get_device_summary(device_name):
+
+    # TO DO
+
+    # print(list_df.iloc[:, 3])
+    # For debug
+    # print(device_name)
+    # filtered_df = list_df[list_df.iloc[:, 3] == device_name].copy()
+    # print(filtered_df)
+
+    # Step 1: Filter relevant rows
+    filtered_df = list_df[
+        (list_df.iloc[:, 3] == device_name) &
+        (list_df.iloc[:, 4].isin(["Done", "In Process"]))
+    ].copy()
+    #print(filtered_df)
+
+    # Step 2: For each row, find the corresponding vessel name by looking upwards
+    vessel_names = []
+    for idx in filtered_df.index:
+        vessel_name = None
+        search_idx = idx
+        while search_idx >= 0:
+            val = list_df.iloc[search_idx, 1]  # Column C is index 1
+            if pd.notna(val):
+                vessel_name = val
+                break
+            search_idx -= 1
+        vessel_names.append(vessel_name)
+
+    #print(vessel_names)
+
+    # Step 3: Add this info to the result
+    filtered_df.insert(0, "Vessel Name", vessel_names)  #Insert en position 0 ? Oui
+    # print(filtered_df)
+
+    # Optional: Keep only the meaningful columns
+    return filtered_df[["Vessel Name", filtered_df.columns[4], filtered_df.columns[5],filtered_df.columns[6],filtered_df.columns[7],filtered_df.columns[8],filtered_df.columns[9]]]  # Vessel, Device, Status
+
+    #print(filtered_df)
+    return filtered_df
+
+@app.route('/get_device_summary', methods=['POST'])
+def get_device_summary_route():
+    device_name = request.json.get('deviceName')
+    filtered_df = get_device_summary(device_name)
+
+    # Replace NaNs with empty strings
+    filtered_df = filtered_df.fillna('').infer_objects(copy=False)
+    #print(filtered_df)
+
+    # Remove unnamed columns (those usually from index column)
+    column_names3 = [
+        'Vessel Name',
+        'Devices',
+        'Installation Status',
+        'Date of Installation',
+        'Savings/year (fuel efficiency)',
+        'Savings/year (Maitenance)',
+        'Co2 savings ton/year' ]
+    filtered_df.columns = column_names3
+    #print(filtered_df)
+
+    # Return as clean HTML
+    return filtered_df.to_html(index=False, classes='table table-bordered table-striped', border=0)
+
+
 #summaryBIS_df = get_vessel_summary("Britoil 80")
 #print(summaryBIS_df)
 #M=summaryBIS_df.dropna().tolist()
@@ -310,10 +377,37 @@ html_template = """
                 if (icon) item.removeChild(icon);
             });
 
-            
+            // Show the selected section
+            var selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                   selectedSection.style.display = 'block';
+            }
 
+            // Sinon : document.getElementById(sectionId).style.display = 'block';
 
-            document.getElementById(sectionId).style.display = 'block';
+            // Show instructions if it's the 'list' or 'contact' section
+            if (sectionId === 'list') {
+                  const box = document.getElementById('instruction-box');
+                  if (box) {
+                     box.style.display = 'block';
+                     box.style.opacity = '1';
+                     box.style.transition = 'opacity 1s ease';
+                     setTimeout(() => {
+                        box.style.opacity = '0';
+                     }, 3000); // Fade out after 3 seconds
+                  }
+            }
+            if (sectionId === 'contact') {
+                  const box = document.getElementById('instruction-box-nul');
+                  if (box) {
+                     box.style.display = 'block';
+                     box.style.opacity = '1';
+                     box.style.transition = 'opacity 1s ease';
+                     setTimeout(() => {
+                        box.style.opacity = '0';
+                     }, 3000); // Fade out after 3 seconds
+                  }
+            }
 
             // Add highlight or icon to active section
             var activeNav = document.getElementById('nav-' + sectionId);
@@ -350,7 +444,7 @@ html_template = """
 
         function showDevice() {
         console.log("Show Device button clicked");
-        currentAction = "showDessel"; // Store the action type
+        currentAction = "showDevice"; // Store the action type
         showDeviceSelector();
         }
 
@@ -366,8 +460,25 @@ html_template = """
         }
 
         function confirmDeviceSelection() {
-               alert("Status is required.");
-               }
+               // alert("Status is required.");
+               const selectedDevice = document.getElementById('deviceDropdown').value;
+               console.log("Selected Device: " + selectedDevice);
+               // 👇 Call Flask backend to get device summary
+               fetch('/get_device_summary', {
+                   method: 'POST',
+                   headers: {
+                      'Content-Type': 'application/json'
+                   },
+                   body: JSON.stringify({ deviceName: selectedDevice })
+               })
+               .then(response => response.text())
+               .then(html => {
+                  document.getElementById('deviceSummaryDisplay').innerHTML = html;
+               })
+               .catch(error => {
+                  console.error('Error fetching device summary:', error);
+               });
+        }
 
 
         function confirmVesselSelection() {
@@ -449,6 +560,9 @@ html_template = """
 
     <div class="container">
       <div id="welcome" class="section content">
+
+          <iframe title="SustainaBOS2" width="950" height="200" src="https://app.powerbi.com/reportEmbed?reportId=1062d591-1686-420c-bd67-580dcef8cd4c&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe>
+
           <h2>Welcome</h2>
           <p>Here is <b><span class="green">Sustaina</span><span class="purple">BOS</span></b>, the website for the fleet sustainability year review. Usage is for Britoil staff only. Visitors or customers can visite our sustainability section on our website : <a href="https://www.britoil.com.sg/sustainability">Britoil Website</a> <br> <br>  
 The purpose of this tool is:  
@@ -503,6 +617,13 @@ For more information, please contact Axel Faurax directly (see contact section).
 
       <div id="list" class="section content hidden">
 
+          <div id="instruction-box" style="display: none; position: absolute; top: 150px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
+              <strong>Instructions</strong><br><br>
+              By clicking on buttons <b>Show Vessel</b> and <b>Show Devices</b>, you can focus on the vessel or the device of your choice. <br><br>
+ Exemple : Showing the devices of Defiance, or showing every vessel which have LED lights<br><br>
+              <b>Please try!</b>
+          </div>
+
           <div style="margin-bottom: 20px;">
              <button onclick="showVessel()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Vessel</button>
              <button onclick="showDevice()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Device</button>
@@ -524,8 +645,8 @@ For more information, please contact Axel Faurax directly (see contact section).
           </div>
 
           <div id="deviceSelector" style="margin-top: 20px; display: none;">
-             <label for="vesselDropdown" style="font-size: 18px; color: purple;">Which Device?</label>
-             <select id="vesselDropdown" style="font-size: 16px; padding: 5px 10px; margin-left: 10px;">
+             <label for="deviceDropdown" style="font-size: 18px; color: purple;">Which Device?</label>
+             <select id="deviceDropdown" style="font-size: 16px; padding: 5px 10px; margin-left: 10px;">
                 {% for device in listdevice_df['Device'] %}
                     <option value="{{ device }}">{{ device }}</option>
                 {% endfor %}
@@ -536,6 +657,7 @@ For more information, please contact Axel Faurax directly (see contact section).
 
           <!--  This is where the summary table will appear -->
           <div id="vesselSummaryDisplay" style="margin-top: 20px;"></div>
+          <div id="deviceSummaryDisplay" style="margin-top: 20px;"></div>
 
           <br>
 
@@ -627,6 +749,9 @@ For more information, please contact Axel Faurax directly (see contact section).
 
       <div id="analytics" class="section content hidden">
           <h2>Analytics</h2>
+
+
+          <iframe title="SustainaBOS4" width="950" height="250" src="https://app.powerbi.com/reportEmbed?reportId=3720fb28-575c-4f83-a708-38507f6decb9&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe>
 
           <h3>Introduction</h3>
           <table>
@@ -734,6 +859,12 @@ For more information, please contact Axel Faurax directly (see contact section).
       </div>
 
       <div id="contact" class="section content hidden">
+
+          <div id="instruction-box-nul" style="display: none; position: absolute; top: 250px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
+              <strong>HELLO ! </strong><br><br>
+              <b>Feel free to contact me ^^</b>
+          </div>
+
           <h2>Contact</h2>
           <p>Name: Axel Faurax</p>
           <p>Phone (SG): +65 81298204 </p>
@@ -772,9 +903,10 @@ For more information, please contact Axel Faurax directly (see contact section).
             location.reload(); // Reloads the current page
         });
   
-   window.onload = function() {
+      window.onload = function() {
             showSection('welcome');
-        };
+
+      };
    </script>
 
    </body>
