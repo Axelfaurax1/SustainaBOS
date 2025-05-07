@@ -11,12 +11,12 @@ file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=399, usecols="B:J")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=400, usecols="B:J")
 
 # Load the summary sheet
-summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=11, usecols="A:E")
+summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=12, usecols="A:F")
 
-summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=14,  nrows=3, usecols="B:C")
+summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=15,  nrows=3, usecols="B:C")
 
 summary3_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=4, usecols="I:K")
 
@@ -141,10 +141,10 @@ def get_device_summary_route():
 #print(M)
 
 # Load the list of vessel
-listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=19,  nrows=68, usecols="A")
+listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=20,  nrows=68, usecols="A")
 
 # Load the list of devices
-listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=10, usecols="A")
+listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=11, usecols="A")
 #print(listdevice_df)
 
 
@@ -360,6 +360,15 @@ html_template = """
             }
         }
 
+        function loadPowerBIReport() {
+           document.getElementById("analyticsContainer").innerHTML = `
+           <iframe title="SustainaBOS7" width="950" height="1250"
+        src="https://app.powerbi.com/reportEmbed?reportId=19eea1f2-00f5-4fcf-8d6d-6bed6f27d0e5&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false"
+           frameborder="0" allowFullScreen="true">
+           </iframe>
+    `      ;
+        }
+
         function showSection(sectionId) {
             var sections = document.getElementsByClassName('section');
             var navItems = document.querySelectorAll('a[id^="nav-"]');  
@@ -407,6 +416,11 @@ html_template = """
                         box.style.opacity = '0';
                      }, 3000); // Fade out after 3 seconds
                   }
+            }
+
+            // 👉 Add Power BI iframe only when user navigates to analytics
+            if (sectionId === 'analytics') {
+                loadPowerBIReport();
             }
 
             // Add highlight or icon to active section
@@ -575,7 +589,7 @@ The purpose of this tool is:
 For more information, please contact Axel Faurax directly (see contact section). The tool is currently under development to offer as many features as possible.
           </p>
           
-          <h3>Overall yearly results :</h3>
+          <!-- <h3>Overall yearly results :</h3>
           <table>
               {% for index, row in summary2_df.iterrows() %}
               <tr>
@@ -594,9 +608,15 @@ For more information, please contact Axel Faurax directly (see contact section).
                   {% endfor %}
               </tr>
               {% endfor %}
-          </table>
+          </table> -->
+
+          <h3>Scope 1, 2, 3 - Reminder :</h3>
+          <p> Here is both an explanation and a reminder of what we called Scopes in Sustainability. Also what it means for Britoil. Today Britoil is mainly focus on the third Scopes, because Scope 1 we are not paying the fuel, and Scope 2 has a minimal impact compare to the tow others. </p>
+
+          <img src="{{ url_for('static', filename='Scopes.png') }}"      alt="Scopes" style="width:950px; display: block; margin: auto;">
+
+
           <br>
-          <img src="{{ url_for('static', filename='view2.png') }}"      alt="ESG" style="height:400px; display: block; margin: auto;">
           <h3>Green News :</h3>
           <p> <b> BOS Princess: Successfully Converted Into Geotechnical Drilling Vessel </b> 🛠 <br> <br>
 
@@ -613,16 +633,22 @@ For more information, please contact Axel Faurax directly (see contact section).
       <h2><span class="green">Sustaina</span><span class="purple">BOS</span> </h2>
       Powered by Axel FAURAX and Technical Department.
 
+      <br>
+      <br>
+          <img src="{{ url_for('static', filename='view2.png') }}"      alt="ESG" style="height:400px; display: block; margin: auto;">
+
+
       </div>
 
       <div id="list" class="section content hidden">
 
-          <div id="instruction-box" style="display: none; position: absolute; top: 150px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
+          <!-- <p>This line is muted and won't appear on the page.</p> -->
+          <!-- <div id="instruction-box" style="display: none; position: absolute; top: 150px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
               <strong>Instructions</strong><br><br>
               By clicking on buttons <b>Show Vessel</b> and <b>Show Devices</b>, you can focus on the vessel or the device of your choice. <br><br>
  Exemple : Showing the devices of Defiance, or showing every vessel which have LED lights<br><br>
               <b>Please try!</b>
-          </div>
+          </div> -->
 
           <div style="margin-bottom: 20px;">
              <button onclick="showVessel()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Vessel</button>
@@ -674,7 +700,7 @@ For more information, please contact Axel Faurax directly (see contact section).
                   {% elif loop.last %}
                   <td>
                      {% if value is number %}
-                     <span style="color: {% if value >= 0.505 %}green{% elif value >= 0.20 and value < 0.505 %}orange{% else %}red{% endif %}; font-weight: bold;"> 
+                     <span style="color: {% if value >= 0.505 %}green{% elif value >= 0.30 and value < 0.505 %}orange{% else %}red{% endif %}; font-weight: bold;"> 
                         {{ (value * 100) | round(0) }}%
                      </span>
                      {% else %}
@@ -750,10 +776,24 @@ For more information, please contact Axel Faurax directly (see contact section).
       <div id="analytics" class="section content hidden">
           <h2>Analytics</h2>
 
+          <p> You can interact with BI charts after sign in. Refresh if any issues </p>
 
-          <iframe title="SustainaBOS4" width="950" height="250" src="https://app.powerbi.com/reportEmbed?reportId=3720fb28-575c-4f83-a708-38507f6decb9&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe>
+          <h3>BI Analysis</h3>
 
-          <h3>Introduction</h3>
+          <div id="analyticsContainer"></div>
+
+          <!-- <iframe title="SustainaBOS7" width="950" height="1250" src="https://app.powerbi.com/reportEmbed?reportId=19eea1f2-00f5-4fcf-8d6d-6bed6f27d0e5&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
+
+          <!-- <iframe title="SustainaBOS6" width="950" height="900" src="https://app.powerbi.com/reportEmbed?reportId=49b41197-4b6b-44b5-af29-6a685ea9dcdc&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
+
+          <!-- <h3>Introduction</h3>
+
+          <iframe title="SustainaBOS4" width="950" height="250" src="https://app.powerbi.com/reportEmbed?reportId=3720fb28-575c-4f83-a708-38507f6decb9&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
+
+          
+
+
+          <h3>Old Analytics</h3>
           <table>
               {% for index, row in summary3_df.iterrows() %}
               <tr>
@@ -768,7 +808,7 @@ For more information, please contact Axel Faurax directly (see contact section).
                       {{ (value * 100) | int}}%
                   </td>
                   {% elif col_index == 1 and index == 2 %}
-                  <td style="font-weight: bold; color: orange;">
+                  <td style="font-weight: bold; color: green;">
                       {{ (value * 100) | round(0) | int }}%
                   {% elif col_index == 1 and index == 3 %}
                   <td style="font-weight: bold; color: green;">{{ (value * 100) | round(2) }}%</td>
