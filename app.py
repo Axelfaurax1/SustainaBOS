@@ -11,10 +11,10 @@ file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=400, usecols="B:J")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=418, usecols="B:J")
 
 # Load the summary sheet
-summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=12, usecols="A:F")
+summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=13, usecols="A:F")
 
 summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=15,  nrows=3, usecols="B:C")
 
@@ -141,10 +141,10 @@ def get_device_summary_route():
 #print(M)
 
 # Load the list of vessel
-listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=20,  nrows=68, usecols="A")
+listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=21,  nrows=70, usecols="A")
 
 # Load the list of devices
-listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=11, usecols="A")
+listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=12, usecols="A")
 #print(listdevice_df)
 
 
