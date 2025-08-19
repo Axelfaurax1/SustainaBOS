@@ -1,6 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from flask import Flask, render_template_string, request
+import os
+import smtplib
+from email.mime.text import MIMEText
 
 # Create a Flask app
 app = Flask(__name__)
@@ -509,6 +512,18 @@ html_template = """
                  console.log("Device name: " + deviceName);
                  // Here you can add further logic to save the device or show confirmation
                  alert("Device '" + deviceName + "' has been added to vessel '" + selectedVessel + "'");
+                 // 👇 ADD THIS: send to backend so you get an email
+                 fetch('/notify_new_device', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                         vessel: selectedVessel,
+                         device: deviceName
+                    })
+                 })
+                 .then(res => res.json())
+                 .then(data => console.log("Notification:", data))
+                 .catch(err => console.error("Error sending notification:", err));
               } else {
                   alert("Device name is required.");
               }
@@ -956,6 +971,32 @@ For more information, please contact Axel Faurax directly (see contact section).
 @app.route('/')
 def index():
     return render_template_string(html_template, vessel_devices=vessel_devices, list_df=list_df, summary_df=summary_df, summary2_df=summary2_df, summary3_df=summary3_df, listvessel_df=listvessel_df,listdevice_df=listdevice_df)
+
+@app.route('/notify_new_device', methods=['POST'])
+def notify_new_device():
+    data = request.json
+    vessel = data.get("vessel")
+    device = data.get("device")
+
+    # Build the email
+    sender = os.getenv("SMTP_USER")  # your email (set as env variable)
+    recipient = "axel.faurax@britoil.com.sg"
+    msg = MIMEText(f"🚢 New device added!\n\nVessel: {vessel}\nDevice: {device}")
+    msg['Subject'] = "New Device Notification"
+    msg['From'] = sender
+    msg['To'] = recipient
+
+    try:
+        # Connect to your mail server (Office365)
+        with smtplib.SMTP(os.getenv("SMTP_SERVER", "smtp.office365.com"), int(os.getenv("SMTP_PORT", 587))) as server:
+            server.starttls()
+            server.login(sender, os.getenv("SMTP_PASS"))
+            server.sendmail(sender, [recipient], msg.as_string())
+
+        return jsonify({"status": "success", "message": "Notification sent"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
