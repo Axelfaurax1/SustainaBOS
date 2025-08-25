@@ -12,8 +12,11 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-now")  # set a real va
 
 # --- Simple users (change these!) ---
 users = {
-    "axel": "mypassword",
-    "admin": "secret123"
+    "Axel": "BOSaxfa*",
+    "admin": "secret123",
+    "Mohit": "BOSmosa*",
+    "Florent": "BOSflki*",
+    "Julian": "BOSjuoh*"
 }
 
 
@@ -994,7 +997,6 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # If already logged in, go to home
     if 'user' in session:
         return redirect(url_for('index'))
 
@@ -1004,28 +1006,85 @@ def login():
 
         if username in users and users[username] == password:
             session['user'] = username
+            session.permanent = True  # keep session if you want expiry control
             return redirect(url_for('index'))
         else:
-            # Simple error page; we can pretty it up later
-            return '''
-                <h2>Login</h2>
-                <p style="color:red;"> Invalid username or password</p>
-                <form method="post">
-                    <input type="text" name="username" placeholder="Username" required><br>
-                    <input type="password" name="password" placeholder="Password" required><br>
-                    <button type="submit">Login</button>
-                </form>
-            ''', 401
+            error = " Invalid username or password"
+    else:
+        error = None
 
-    # GET: show login form
-    return '''
-        <h2>Login</h2>
-        <form method="post">
-            <input type="text" name="username" placeholder="Username" required><br>
-            <input type="password" name="password" placeholder="Password" required><br>
-            <button type="submit">Login</button>
-        </form>
-    '''
+    login_page = f"""
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background: #f4f6f8;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }}
+            .login-container {{
+                background: white;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                text-align: center;
+                width: 350px;
+            }}
+            .login-container img {{
+                width: 100px;
+                margin-bottom: 20px;
+            }}
+            .login-container h2 {{
+                margin-bottom: 20px;
+            }}
+            .login-container input {{
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+            }}
+            .login-container button {{
+                width: 100%;
+                padding: 12px;
+                background: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+            }}
+            .login-container button:hover {{
+                background: #0056b3;
+            }}
+            .error {{
+                color: red;
+                margin-bottom: 15px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <img src="/static/imagelogin.jpg" alt="Login">
+            <h2>Please Sign In</h2>
+            {f'<p class="error">{error}</p>' if error else ''}
+            <form method="post">
+                <input type="text" name="username" placeholder="Username" required><br>
+                <input type="password" name="password" placeholder="Password" required><br>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </body>
+    </html>
+    """
+    return login_page
 
 @app.route('/logout')
 def logout():
