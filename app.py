@@ -1,12 +1,20 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, redirect, url_for, session
 import os
 import smtplib
 from email.mime.text import MIMEText
 
 # Create a Flask app
 app = Flask(__name__)
+
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-now")  # set a real value in Render later
+
+# --- Simple users (change these!) ---
+users = {
+    "axel": "mypassword",
+    "admin": "secret123"
+}
 
 
 # Load the Excel file with specified column names starting from row 8 and column B
@@ -970,7 +978,59 @@ For more information, please contact Axel Faurax directly (see contact section).
 
 @app.route('/')
 def index():
-    return render_template_string(html_template, vessel_devices=vessel_devices, list_df=list_df, summary_df=summary_df, summary2_df=summary2_df, summary3_df=summary3_df, listvessel_df=listvessel_df,listdevice_df=listdevice_df)
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    return render_template_string(
+        html_template,
+        vessel_devices=vessel_devices,
+        list_df=list_df,
+        summary_df=summary_df,
+        summary2_df=summary2_df,
+        summary3_df=summary3_df,
+        listvessel_df=listvessel_df,
+        listdevice_df=listdevice_df
+    )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # If already logged in, go to home
+    if 'user' in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if username in users and users[username] == password:
+            session['user'] = username
+            return redirect(url_for('index'))
+        else:
+            # Simple error page; we can pretty it up later
+            return '''
+                <h2>Login</h2>
+                <p style="color:red;"> Invalid username or password</p>
+                <form method="post">
+                    <input type="text" name="username" placeholder="Username" required><br>
+                    <input type="password" name="password" placeholder="Password" required><br>
+                    <button type="submit">Login</button>
+                </form>
+            ''', 401
+
+    # GET: show login form
+    return '''
+        <h2>Login</h2>
+        <form method="post">
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <button type="submit">Login</button>
+        </form>
+    '''
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
 @app.route('/notify_new_device', methods=['POST'])
 def notify_new_device():
