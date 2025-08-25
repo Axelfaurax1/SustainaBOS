@@ -1006,10 +1006,10 @@ def login():
 
         if username in users and users[username] == password:
             session['user'] = username
-            session.permanent = True  # keep session if you want expiry control
+            session.permanent = True
             return redirect(url_for('index'))
         else:
-            error = " Invalid username or password"
+            error = "Invalid username or password"
     else:
         error = None
 
@@ -1022,7 +1022,8 @@ def login():
         <style>
             body {{
                 font-family: Arial, sans-serif;
-                background: #f4f6f8;
+                background: url('/static/imagelogin.JPG') no-repeat center center fixed;
+                background-size: cover;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -1030,16 +1031,12 @@ def login():
                 margin: 0;
             }}
             .login-container {{
-                background: white;
+                background: rgba(255, 255, 255, 0.9);
                 padding: 40px;
                 border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                 text-align: center;
                 width: 350px;
-            }}
-            .login-container img {{
-                width: 100px;
-                margin-bottom: 20px;
             }}
             .login-container h2 {{
                 margin-bottom: 20px;
@@ -1072,7 +1069,6 @@ def login():
     </head>
     <body>
         <div class="login-container">
-            <img src="/static/imagelogin.JPG" alt="Login">
             <h2>Please Sign In</h2>
             {f'<p class="error">{error}</p>' if error else ''}
             <form method="post">
