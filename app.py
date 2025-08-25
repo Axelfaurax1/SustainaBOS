@@ -1072,7 +1072,7 @@ def login():
     </head>
     <body>
         <div class="login-container">
-            <img src="/static/imagelogin.jpg" alt="Login">
+            <img src="/static/imagelogin.JPG" alt="Login">
             <h2>Please Sign In</h2>
             {f'<p class="error">{error}</p>' if error else ''}
             <form method="post">
