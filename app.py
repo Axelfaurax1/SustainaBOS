@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template_string, request, redirect, url_for, session
+from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -201,6 +201,7 @@ html_template = """
 <head>
     <title>SustainaBOS</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #E8F5E9; margin: 0; padding: 0; }
         .container { width: 80%; margin: auto; overflow: hidden; }
@@ -360,6 +361,201 @@ html_template = """
             color: #0056b3;
          }
 
+    /* ===== Design Uplift – paste at end of <style> ===== */
+    :root{
+       --brand-purple:#6a1b9a;
+       --brand-green:#2e7d32;
+       --ink:#1b1b1b;
+       --muted:#667085;
+       --bg:#f7f8fa;
+       --card:#ffffff;
+       --border:#e9ecef;
+       --radius:14px;
+     }
+
+     html,body{scroll-behavior:smooth;}
+     body{
+       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+       color: var(--ink);
+       background: var(--bg);
+       line-height:1.55;
+     }
+
+     .container{max-width:1140px; padding: 0 16px;}
+
+     header{
+      background:#eaffea; /* Light light green */
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+      position: sticky; top: 0; z-index: 1000;
+      box-shadow: 0 6px 20px rgba(0,0,0,.06);
+     }
+
+     #branding h1{ color: var(--brand-purple); font-weight: 800; letter-spacing:.2px; }
+
+     .section.content{
+       background: var(--card);
+       border:1px solid var(--border);
+       border-radius: var(--radius);
+       box-shadow: 0 10px 30px rgba(0,0,0,.04);
+     }
+
+     .menu a, header a{ color: var(--brand-purple); }
+     .menu a:hover, header a:hover{ color: var(--brand-green); }
+
+     .active-nav{
+       color: var(--brand-green) !important;
+       font-weight: 700;
+       position: relative;
+     }
+     .active-nav::after{
+       content:"";
+       position:absolute; left:0; right:0; bottom:-8px; height:3px;
+       background: linear-gradient(90deg, var(--brand-green), var(--brand-purple));
+       border-radius:3px;
+      }
+
+     button{
+       border-radius:12px;
+       border:1px solid var(--border);
+       background:#fff;
+       font-weight:600;
+       transition: transform .06s ease, box-shadow .2s ease;
+     }
+     button:hover{ transform: translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,.08); }
+     button:active{ transform: translateY(0); }
+
+     table{
+       border:1px solid var(--border);
+       border-radius: 10px;
+       overflow: hidden;
+     }
+     th{
+        background: linear-gradient(90deg, #2e7d32, #6a1b9a);
+        color:#fff; font-weight:700; letter-spacing:.2px;
+        position: sticky; top:0; z-index:1;
+     }
+     td, th{ border-color: var(--border) !important; }
+     tr:nth-child(even){ background:#fafafa; }
+     tr:hover{ background:#f3f6ff; }
+
+     /* Fab: soften */
+     #fab-button{ background:#fff; border:1px solid var(--border); }
+
+     /* Smaller splash duration tweak (feels snappier) */
+     #splash{ animation-delay:.9s; }
+
+    /* ===== Initiatives Carousel ===== */
+    .carousel{
+      position: relative; margin: 18px 0 8px;
+    }
+    .carousel-track{
+       display:flex; gap:16px; overflow-x:auto; padding:8px 8px 16px;
+       scroll-snap-type: x mandatory; scrollbar-width: thin;
+    }
+    .carousel-track::-webkit-scrollbar{ height:8px; }
+    .carousel-track::-webkit-scrollbar-thumb{ background:#c7c9d1; border-radius:8px; }
+
+    .initiative-card{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      scroll-snap-align: start;
+      min-width: 220px;
+      max-width: 260px;
+      flex: 0 0 auto;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:24px 18px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      transition: transform .06s ease, box-shadow .2s ease;
+    }
+
+    .initiative-card:hover{
+      transform: translateY(-2px);
+      box-shadow:0 12px 26px rgba(0,0,0,.1);
+    }
+
+    .initiative-title{
+      font-weight:700;
+      color: var(--brand-purple);
+      margin:8px 0 6px;
+    }
+
+    .initiative-card i{
+      width:36px;
+      height:36px;
+      margin:8px 0;
+      stroke-width:2.4;
+      color: var(--brand-green);
+    }
+
+    .initiative-sub{
+      color: var(--muted);
+      font-size:.92rem;
+      margin-top:6px;
+    }
+
+     .carousel-nav{
+        position:absolute; top:50%; transform:translateY(-50%);
+        border:none; background:#fff; border:1px solid var(--border);
+        height:40px; width:40px; border-radius:50%;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:0 8px 18px rgba(0,0,0,.08);
+     }
+     .carousel-nav:hover{ box-shadow:0 10px 28px rgba(0,0,0,.12); }
+     .carousel-prev{ left:-12px; } .carousel-next{ right:-12px; }
+
+     @media (max-width: 640px){
+        .carousel-prev{ left:-6px;} .carousel-next{ right:-6px;}
+     }
+
+    /* Stronger table card effect */
+    .section.content table {
+      box-shadow: 0 10px 28px rgba(0,0,0,.08);
+      border-radius: 14px;
+    }
+
+    /* Make the 4 action buttons look like initiative cards */
+    .action-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:20px;
+      margin: 20px 0;
+    }
+
+    .action-buttons button{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:22px 34px;
+      font-size:20px;
+      font-weight:600;
+      color:var(--brand-purple);
+      cursor:pointer;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      transition: transform .08s ease, box-shadow .18s ease;
+    }
+
+    .action-buttons button:hover{
+       transform: translateY(-2px);
+       box-shadow:0 12px 28px rgba(0,0,0,.12);
+    }
+
+    /* Icons inside buttons & cards */
+    .action-buttons i,
+    .initiative-card i {
+      width:20px;
+      height:20px;
+      margin-right:12px;
+      vertical-align:middle;
+      stroke-width:2.2;
+    }
          
     </style>
     <script>
@@ -458,10 +654,19 @@ html_template = """
         showVesselSelector();
         }
 
-        function modifyStatus() {
-        console.log("Modify Status button clicked");
-        currentAction = "modifyStatus"; // Store the action type
-        showVesselSelector();
+        // function modifyStatus() {
+        // console.log("Modify Status button clicked");
+        // currentAction = "modifyStatus"; // Store the action type
+        // showVesselSelector();
+        // } 
+
+        function openTracker() {
+        // Opens the Britoil SharePoint tracker in a new tab
+          window.open(
+            'https://britoilos-my.sharepoint.com/:x:/g/personal/axel_faurax_britoil_com_sg/EXZ7myRyuexAri5Js-87reoBpko4Jot6Xyztu5ZOijIY0A?e=QQKycU',
+            '_blank', 
+            'noopener'
+          );
         }
 
         function showVessel() {
@@ -564,7 +769,31 @@ html_template = """
                });
             }
         }
+
+    function selectDeviceFromCard(deviceName){
+      // Sync hidden dropdown then reuse your existing fetch logic
+      const dd = document.getElementById('deviceDropdown');
+      if (dd){
+        dd.value = deviceName;
+        confirmDeviceSelection(); // calls /get_device_summary and fills #deviceSummaryDisplay
+      }
+    }
+
+    // Carousel controls
+    window.addEventListener('DOMContentLoaded', function(){
+      const track = document.getElementById('initiativesTrack');
+      const prev  = document.getElementById('iniPrev');
+      const next  = document.getElementById('iniNext');
+      if(track && prev && next){
+        const step = () => Math.max(track.clientWidth * 0.9, 260); // almost a page
+        prev.addEventListener('click', () => track.scrollBy({left: -step(), behavior:'smooth'}));
+        next.addEventListener('click', () => track.scrollBy({left:  step(), behavior:'smooth'}));
+      }
+    });
+
     </script>
+
+    
 </head>
 <body>
     <div id="splash">
@@ -676,11 +905,31 @@ For more information, please contact Axel Faurax directly (see contact section).
               <b>Please try!</b>
           </div> -->
 
-          <div style="margin-bottom: 20px;">
+          <div class="action-buttons">
+             <button onclick="showVessel()">
+                <i data-lucide="ship"></i>
+                Show One Vessel
+             </button>
+             <button onclick="showDevice()">
+                <i data-lucide="bar-chart-2"></i>
+                Show One Device
+             </button>
+             <button onclick="addDevice()">
+                <i data-lucide="plus-circle"></i>
+                Add Devices
+             </button>
+             <button onclick="openTracker()">
+               <i data-lucide="table"></i>
+               Modify Excel Table
+             </button>
+
+          <!-- <div style="margin-bottom: 20px;">
              <button onclick="showVessel()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Vessel</button>
              <button onclick="showDevice()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Device</button>
              <button onclick="addDevice()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">+ Add Devices</button>
-             <button onclick="modifyStatus()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Modify Status</button>
+             <button onclick="openTracker()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">
+               Modify Table
+             </button> --> 
              
           </div>
 
@@ -713,8 +962,39 @@ For more information, please contact Axel Faurax directly (see contact section).
 
           <br>
 
-          <h3>New Initiatives - Look</h3>
-          <img src="{{ url_for('static', filename='initiatives1.png') }}"      alt="ini" style="height:300px; display: block; margin: auto;">
+          <h3>New Initiatives - Cards</h3>
+          <div class="carousel" aria-label="Initiatives carousel">
+            <button class="carousel-nav carousel-prev" id="iniPrev" aria-label="Previous">‹</button>
+            <div class="carousel-track" id="initiativesTrack">
+               {% for device in listdevice_df['Device'] %}
+                 {% if device %}
+                 <div class="initiative-card" role="button" tabindex="0"
+                   onclick="selectDeviceFromCard('{{ device|replace(\"'\", \"\\'\") }}')"
+                   onkeypress="if(event.key==='Enter'){selectDeviceFromCard('{{ device|replace(\"'\", \"\\'\") }}')}">
+                  <div class="initiative-title">{{ device }}</div>
+                  <i data-lucide="{% if 'MGPS' in device %}beaker{% 
+                    elif 'Chlorinator' in device %}flask-round{% 
+                    elif 'CMCE LP' in device %}zap{% 
+                    elif 'IWTM Filter' in device %}droplet{% 
+                    elif 'EFMS' in device %}activity{% 
+                    elif 'CJC Filter' in device %}gauge{% 
+                    elif 'LED Lights' in device %}lightbulb{% 
+                    elif 'AI CCTV' in device %}shield{% 
+                    elif 'Deva Paint' in device %}lightbulb{% 
+                    elif 'Spinergie Fleet' in device %}bar-chart-3{% 
+                    elif 'Nautilus Log' in device %}bar-chart-3{% 
+                    elif 'RE Conversion' in device %}file-text{% 
+                    elif 'SeaQuest Endura' in device %}wind{% 
+                    elif 'Hempaguard' in device %}scale{% 
+                    elif 'IOW Separator' in device %}leaf{% 
+                    else %}settings{% endif %}"></i>
+                  <div class="initiative-sub">Click to view in which vessels the system is installed or in-process </div>
+                 </div>
+                 {% endif %}
+               {% endfor %}
+            </div>
+            <button class="carousel-nav carousel-next" id="iniNext" aria-label="Next">›</button>
+          </div>
 
           <h3>Summary Track Sheet</h3>
           <table>
@@ -973,6 +1253,10 @@ For more information, please contact Axel Faurax directly (see contact section).
             showSection('welcome');
 
       };
+   </script>
+
+   <script>
+      lucide.createIcons();
    </script>
 
    </body>
