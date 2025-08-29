@@ -929,7 +929,7 @@ html_template = """
 
           <!-- Vision -->
           <a href="#vision" class="feature-card" style="text-decoration:none;">
-            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic3.jpg') }}');"></div>
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic3.JPG') }}');"></div>
             <div class="body">
               <h4>Vessel Sustainability vision</h4>
               <p>How we see the journey for Britoil vessels.</p>
