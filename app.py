@@ -556,6 +556,59 @@ html_template = """
       vertical-align:middle;
       stroke-width:2.2;
     }
+
+    /* ===== Home redesign ===== */
+    .home-feature-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      gap:22px;
+      margin:18px 0 8px;
+    }
+    .feature-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 8px 24px rgba(0,0,0,.06);
+      transition:transform .08s ease, box-shadow .18s ease;
+    }
+    .feature-card:hover{ transform:translateY(-2px); box-shadow:0 14px 32px rgba(0,0,0,.10); }
+    .feature-card .media{
+      height:160px; display:flex; align-items:center; justify-content:center;
+      background:#f4f6ff; position:relative;
+    }
+    .feature-card .media.media-img{
+      background-size:cover; background-position:center; filter:saturate(1.05);
+    }
+    .feature-card .media i{ width:44px; height:44px; stroke-width:2.4; color:var(--brand-green); }
+    .feature-card .body{ padding:18px 18px 16px; }
+    .feature-card h4{ margin:0 0 8px; font-size:1.1rem; }
+    .feature-card p{ color:var(--muted); margin:0 0 12px; }
+    .feature-card .readmore{
+      font-weight:600; text-decoration:none; color:var(--brand-purple);
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .feature-card .readmore:hover{ color:var(--brand-green); }
+
+    /* Detail blocks */
+    .section-block{
+      background:#fff; border:1px solid var(--border); border-radius:18px;
+      padding:26px; margin-top:26px; box-shadow:0 10px 28px rgba(0,0,0,.06);
+    }
+    .split{ display:grid; grid-template-columns: 1.2fr 1fr; gap:26px; align-items:center; }
+    .split img{ width:100%; border-radius:14px; border:1px solid var(--border); box-shadow:0 8px 22px rgba(0,0,0,.06); }
+    @media (max-width: 900px){ .split{ grid-template-columns:1fr; } }
+
+    /* Chips & lists */
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .chip{ background:#f3f5f7; border:1px solid var(--border); padding:6px 10px; border-radius:999px; font-size:.9rem; }
+    .checklist{ padding-left:0; list-style:none; }
+    .checklist li{ display:flex; gap:10px; align-items:flex-start; margin:8px 0; }
+    .checklist li i{ width:18px; height:18px; color:var(--brand-green); margin-top:2px; }
+
+    /* Scroll-reveal */
+    .reveal{ opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s ease; }
+    .reveal.is-visible{ opacity:1; transform:none; }
          
     </style>
     <script>
@@ -668,6 +721,10 @@ html_template = """
             'noopener'
           );
         }
+
+        function showKPI() {
+        // open analytics section
+          showSection('analytics')}
 
         function showVessel() {
         console.log("Show Vessel button clicked");
@@ -830,70 +887,164 @@ html_template = """
     <div class="container">
       <div id="welcome" class="section content">
 
-          <iframe title="SustainaBOS2" width="950" height="200" src="https://app.powerbi.com/reportEmbed?reportId=1062d591-1686-420c-bd67-580dcef8cd4c&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe>
+        <!-- Keep your BI for now -->
+        <iframe title="SustainaBOS2" width="950" height="200"
+  src="https://app.powerbi.com/reportEmbed?reportId=1062d591-1686-420c-bd67-580dcef8cd4c&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false"
+  frameborder="0" allowFullScreen="true"></iframe>
 
-          <h2>Welcome</h2>
-          <p>Here is <b><span class="green">Sustaina</span><span class="purple">BOS</span></b>, the website for the fleet sustainability year review. Usage is for Britoil staff only. Visitors or customers can visite our sustainability section on our website : <a href="https://www.britoil.com.sg/sustainability">Britoil Website</a> <br> <br>  
-The purpose of this tool is:  
-<ul>
-    <li>To track the implementation of new solutions.</li>
-    <li>To provide a quantified overview of total savings and CO2 equivalent.</li>
-    <li>To compare vessels and assess their performance.</li>
-    <li>To offer additional analytics for deeper insights (see section).</li>
-</ul>
-For more information, please contact Axel Faurax directly (see contact section). The tool is currently under development to offer as many features as possible.
-          </p>
-          
-          <!-- <h3>Overall yearly results :</h3>
-          <table>
-              {% for index, row in summary2_df.iterrows() %}
-              <tr>
-                  {% for col_index in range(row.size) %}
-                  {% set value = row.iloc[col_index] %}
+        <h2 style="margin-top:10px">Featured content</h2>
 
-                  {% if col_index == 1 and index == 0 %}
-                  <td style="font-weight: bold; color: green;">
-                      {{ "{:,.2f} $".format(value|float|int) }}
-                  </td>
-                  {% elif col_index == 1 %}
-                  <td style="font-weight: bold; color: green;">{{ value|float|int }}</td>
-                  {% else %}
-                  <td>{{ value }}</td>
-                  {% endif %}
-                  {% endfor %}
-              </tr>
-              {% endfor %}
-          </table> -->
+        <!-- Shell-like 6 cards -->
+        <div class="home-feature-grid reveal">
 
-          <h3>Scope 1, 2, 3 - Reminder :</h3>
-          <p> Here is both an explanation and a reminder of what we called Scopes in Sustainability. Also what it means for Britoil. Today Britoil is mainly focus on the third Scopes, because Scope 1 we are not paying the fuel, and Scope 2 has a minimal impact compare to the tow others. </p>
+          <!-- Purpose -->
+          <a href="#purpose" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='title.jpeg') }}');"></div>
+            <div class="body">
+              <h4>Purpose of the tool</h4>
+              <p>What SustainaBOS is and how Britoil teams use it.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
 
-          <img src="{{ url_for('static', filename='Scopes.png') }}"      alt="Scopes" style="width:950px; display: block; margin: auto;">
+          <!-- Scopes -->
+          <a href="#scopes" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic2.jpg') }}');"></div>
+            <div class="body">
+              <h4>Goals & Scopes</h4>
+              <p>Scope 1/2/3 overview and Britoil’s current focus.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
+
+          <!-- News -->
+          <a href="#news" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='Princess.jpeg') }}');"></div>
+            <div class="body">
+              <h4>BOS Princess — News</h4>
+              <p>Conversion to a Geotechnical Drilling Vessel.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
+
+          <!-- Vision -->
+          <a href="#vision" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic3.jpg') }}');"></div>
+            <div class="body">
+              <h4>Vessel Sustainability vision</h4>
+              <p>How we see the journey for Britoil vessels.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
+
+          <!-- Vision 2 -->
+          <a href="#vision2" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic1.jpg') }}');"></div>
+            <div class="body">
+              <h4>Company Sustainability vision</h4>
+              <p>How we see the journey for Britoil vessels.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
+
+          <!-- Sustainabilty Report -->
+          <a href="#report" class="feature-card" style="text-decoration:none;">
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='reportex.jpg') }}');"></div>
+            <div class="body">
+              <h4>Sustainability Report 2024</h4>
+              <p>The last sustainability report produced by the company.</p>
+              <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
+            </div>
+          </a>
 
 
-          <br>
-          <h3>Green News :</h3>
-          <p> <b> BOS Princess: Successfully Converted Into Geotechnical Drilling Vessel </b> 🛠 <br> <br>
+        </div>
 
-          We are pleased to announce the successful conversion of the BOS Princess from a Platform Supply Vessel              (PSV) into a Geotechnical Drilling Vessel, enhancing our capabilities in support of the offshore wind industry.
-          <br> <br>
-          As part of this transformation, Besiktas Shipyard carried out a Moon Pool opening, Rig Tower, and A-frame installation to enhance BOS Princess’ geotechnical support capabilities. Additionally, the vessel also underwent an Azimuth Thruster maintenance and a comprehensive overhaul to ensure optimal performance in demanding offshore conditions.
-          <br> <br>
-          With these upgrades, BOS Princess will provide a stable and efficient platform for Seas Geosciences’ geotechnical investigations, further strengthening our commitment to advancing offshore wind energy. </p>
-          <br> <br>
-          <img src="{{ url_for('static', filename='Princess.jpeg') }}"      alt="Princess" style="height:600px; display: block; margin: auto;">
+        <!-- PURPOSE -->
+        <div id="purpose" class="section-block split reveal">
+          <div>
+            <h3>What is <span class="green">Sustaina</span><span class="purple">BOS</span>?</h3>
+            <p>Internal platform to track solutions, quantify savings and compare vessel performance with extra analytics.</p>
+            <ul class="checklist">
+              <li><i data-lucide="check-circle-2"></i><span>Track the implementation of new solutions across vessels.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Consolidate cost/CO₂-eq savings and progress.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Benchmark vessels and identify opportunities.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Dive deeper with Analytics (see section).</span></li>
+            </ul>
+            <div class="chips">
+             <span class="chip">Fleet view</span>
+             <span class="chip">Savings tracker</span>
+             <span class="chip">Device adoption</span>
+            </div>
+          </div>
+          <div>
+            <img src="{{ url_for('static', filename='green_leaf3.png') }}" alt="SustainaBOS">
+          </div>
+        </div>
 
-      <br>
+        <!-- SCOPES -->
+        <div id="scopes" class="section-block split reveal">
+          <div>
+            <h3>Goals & Scopes (reminder)</h3>
+            <p>Britoil currently focuses mainly on Scope 3. Scope 1 fuel is not paid by us, and Scope 2 impact is comparatively small.</p>
+            <div class="chips">
+             <span class="chip">Scope 1 — Direct</span>
+             <span class="chip">Scope 2 — Energy</span>
+             <span class="chip">Scope 3 — Value chain</span>
+            </div>
+          </div>
+          <div>
+            <img src="{{ url_for('static', filename='Scopes.png') }}" alt="Scopes diagram">
+          </div>
+        </div>
 
-      <h2><span class="green">Sustaina</span><span class="purple">BOS</span> </h2>
-      Powered by Axel FAURAX and Technical Department.
+        <!-- NEWS -->
+        <div id="news" class="section-block split reveal">
+          <div>
+            <img src="{{ url_for('static', filename='Princess.jpeg') }}" alt="BOS Princess">
+          </div>
+          <div>
+            <h3><b>BOS Princess — Successfully Converted</b> 🛠</h3>
+            <p>The vessel has been converted from PSV to Geotechnical Drilling Vessel to support offshore wind work, including moon pool opening, rig tower & A-frame installation, plus azimuth thruster maintenance and overhaul.</p>
+            <p>This strengthens Seas Geosciences’ geotechnical investigations and Britoil’s contribution to offshore wind.</p>
+          </div>
+        </div>
 
-      <br>
-      <br>
-          <img src="{{ url_for('static', filename='view2.png') }}"      alt="ESG" style="height:400px; display: block; margin: auto;">
+        <!-- VISION -->
+        <div id="vision" class="section-block split reveal">
+          <div>
+            <h3>Our vision for Britoil vessels</h3>
+            <ul class="checklist">
+             <li><i data-lucide="check-circle-2"></i><span>Adopt proven efficiency tech (LED, filtration, monitoring).</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Measure what matters: cost & CO₂-eq savings per vessel.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Share insights between regions and speed up roll-outs.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Report clearly—support the annual Sustainability Report.</span></li>
+            </ul>
+            <p style="margin-top:10px;">Powered by Axel FAURAX & the Technical Department.</p>
+          </div>
+          <div>
+            <img src="{{ url_for('static', filename='britoilsus.png') }}" alt="Vision">
+          </div>
+        </div>
 
-
+        <!-- VISION 2 -->
+        <div id="vision2" class="section-block split reveal">
+          <div>
+            <h3>Our ESG vision for Britoil </h3>
+            <ul class="checklist">
+             <li><i data-lucide="check-circle-2"></i><span>Adopt proven efficiency tech (LED, filtration, monitoring).</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Measure what matters: cost & CO₂-eq savings per vessel.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Share insights between regions and speed up roll-outs.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Report clearly—support the annual Sustainability Report.</span></li>
+            </ul>
+            <p style="margin-top:10px;">Powered by Axel FAURAX & the Technical Department.</p>
+          </div>
+          <div>
+            <img src="{{ url_for('static', filename='view2.png') }}" alt="Vision2">
+          </div>
+        </div>
       </div>
+
 
       <div id="list" class="section content hidden">
 
@@ -911,7 +1062,7 @@ For more information, please contact Axel Faurax directly (see contact section).
                 Show One Vessel
              </button>
              <button onclick="showDevice()">
-                <i data-lucide="bar-chart-2"></i>
+                <i data-lucide="gauge"></i>
                 Show One Device
              </button>
              <button onclick="addDevice()">
@@ -922,6 +1073,11 @@ For more information, please contact Axel Faurax directly (see contact section).
                <i data-lucide="table"></i>
                Modify Excel Table
              </button>
+             <button onclick="showKPI()">
+               <i data-lucide="bar-chart-2"></i>
+               Show KPI's
+             </button>
+
 
           <!-- <div style="margin-bottom: 20px;">
              <button onclick="showVessel()" style="margin-right: 15px; font-size: 20px; padding: 20px 30px; color: purple;">Show One Vessel</button>
@@ -1258,6 +1414,18 @@ For more information, please contact Axel Faurax directly (see contact section).
    <script>
       lucide.createIcons();
    </script>
+
+   <script>
+    // Scroll-reveal for .reveal elements
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      });
+    }, {threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+    // Re-render icons that appear dynamically
+    if (window.lucide && lucide.createIcons) { lucide.createIcons(); }
+</script>
 
    </body>
 </html>
