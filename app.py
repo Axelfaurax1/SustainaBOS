@@ -5,6 +5,11 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 
+# To ignore warnings of openxyl, excel sheet weird format
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
+
+
 # Create a Flask app
 app = Flask(__name__)
 
@@ -33,6 +38,33 @@ summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', s
 summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=15,  nrows=3, usecols="B:C")
 
 summary3_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=4, usecols="I:K")
+
+# --- KPIs for Home (Summary!C21:C23) ---
+# We read the sheet without headers so we can address Excel cells by (row-1, col-1)
+summary_raw = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', header=None)
+
+def _num(i, j):
+    v = pd.to_numeric(summary_raw.iat[i, j], errors='coerce')
+    return 0 if pd.isna(v) else float(v)
+
+kpi_devices_raw     = int(_num(22, 2))   # C23 (row index -1, col index -1)
+kpi_gain_raw  = _num(4, 9) *100       # J5
+kpi_co2_raw         = _num(21, 2)        # C22
+
+# Clean / round:
+kpi_devices = int(round(kpi_devices_raw))            # integer count
+kpi_gain = round(kpi_gain_raw, 2)        # two decimal for %
+kpi_co2 = round(kpi_co2_raw, 0)                      # zero decimal for tonnes
+
+# Prepare a list for the template (we’ll animate these later)
+kpis = [
+    {"title": "Initiatives", "value": kpi_devices,    "suffix": "",
+        "back": ["8 initiatives certified", "7 initiatives on POC"]},
+    {"title": "2025 Gain",        "value": kpi_gain, "suffix": "%",
+        "back": ["Goal for 2026 :", "20% power savings"]},
+    {"title": "CO₂ Savings",       "value": kpi_co2,        "suffix": " t",
+        "back": ["Expected savings", "based on fuel savings"]},
+]
 
 def get_vessel_summary(vessel_name):
 
@@ -431,7 +463,7 @@ html_template = """
        overflow: hidden;
      }
      th{
-        background: linear-gradient(90deg, #2e7d32, #6a1b9a);
+        background: var(--brand-purple);
         color:#fff; font-weight:700; letter-spacing:.2px;
         position: sticky; top:0; z-index:1;
      }
@@ -609,6 +641,77 @@ html_template = """
     /* Scroll-reveal */
     .reveal{ opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s ease; }
     .reveal.is-visible{ opacity:1; transform:none; }
+
+    .kpi-carousel {
+       display: flex;
+       justify-content: center;
+       gap: 20px;
+       margin: 30px 0;
+     }
+
+    .kpi-card {
+      width: 230px;   /* was 200px */
+      height: 150px;  /* was 130px */
+      perspective: 1000px;
+    }
+
+    .kpi-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+    }
+
+    .kpi-card.flipped .kpi-inner {
+      transform: rotateY(180deg);
+    }
+
+    .kpi-front, .kpi-back {
+      position: absolute;
+      top:0; left: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      
+      /* 🔑 force same layout */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 10px; /* add here instead of only on back */
+      
+      
+    }
+
+    .kpi-front h3, .kpi-back h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--brand-purple);
+    }
+
+    .kpi-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--brand-green);
+     }
+
+    .kpi-back {
+      transform: rotateY(180deg);
+      text-align: center;
+    }
+
+    .kpi-backline {
+       margin: 5px 0;
+       font-size: 0.95rem;
+       color: var(--muted);
+    }
+
          
     </style>
     <script>
@@ -887,10 +990,29 @@ html_template = """
     <div class="container">
       <div id="welcome" class="section content">
 
-        <!-- Keep your BI for now -->
-        <iframe title="SustainaBOS2" width="950" height="200"
-  src="https://app.powerbi.com/reportEmbed?reportId=1062d591-1686-420c-bd67-580dcef8cd4c&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false"
-  frameborder="0" allowFullScreen="true"></iframe>
+        <!-- KPI Flip Cards -->
+        <div class="kpi-carousel reveal">
+          {% for kpi in kpis %}
+          <div class="kpi-card">
+            <div class="kpi-inner">
+              <!-- Front -->
+              <div class="kpi-front">
+                <h3>{{ kpi.title }}</h3>
+                <p class="kpi-value" data-target="{{ kpi.value }}" data-suffix="{{ kpi.suffix }}">0{{ kpi.suffix }}</p>
+              </div>
+              <!-- Back (same for now, later we can put explanations) -->
+              <div class="kpi-back">
+                <h3>{{ kpi.title }}</h3>
+                {% if kpi.back %}
+                  <p class="kpi-backline">{{ kpi.back[0] }}</p>
+                  <p class="kpi-backline">{{ kpi.back[1] }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
 
         <h2 style="margin-top:10px">Featured content</h2>
 
@@ -899,7 +1021,7 @@ html_template = """
 
           <!-- Purpose -->
           <a href="#purpose" class="feature-card" style="text-decoration:none;">
-            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='title.jpeg') }}');"></div>
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic3.JPG') }}');"></div>
             <div class="body">
               <h4>Purpose of the tool</h4>
               <p>What SustainaBOS is and how Britoil teams use it.</p>
@@ -929,7 +1051,7 @@ html_template = """
 
           <!-- Vision -->
           <a href="#vision" class="feature-card" style="text-decoration:none;">
-            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic3.JPG') }}');"></div>
+            <div class="media media-img" style="background-image:url('{{ url_for('static', filename='reportex3.png') }}');"></div>
             <div class="body">
               <h4>Vessel Sustainability vision</h4>
               <p>How we see the journey for Britoil vessels.</p>
@@ -1425,7 +1547,98 @@ html_template = """
     document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
     // Re-render icons that appear dynamically
     if (window.lucide && lucide.createIcons) { lucide.createIcons(); }
-</script>
+   </script>
+
+   <script>
+     function formatNumberForDisplay(value, suffix="") {
+       if (isNaN(value)) return "--" + suffix;
+
+       // Handle percentages: always 2 decimals
+       if (suffix.includes("%")) {
+         return value.toFixed(2) + suffix;
+       }
+
+       // Round to 1 decimal for others
+       const rounded = Math.round(value * 10) / 10;
+
+       // If it's basically an integer, drop the ".0"
+       if (Number.isInteger(rounded)) {
+        return rounded.toLocaleString() + suffix;
+       }
+
+       // Otherwise, show 0 decimal
+       return rounded.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + suffix;
+       }
+
+     function animateValue(el){
+       const target = parseFloat(el.dataset.target);
+       const suffix = el.dataset.suffix || "";
+
+        if (isNaN(target)) {
+        el.textContent = "--" + suffix;
+        return;
+        }
+
+        // Adaptive duration: smaller numbers take longer to animate
+        let duration;
+        if (target < 50) {
+          duration = 2500;
+        } else if (target < 10000) {
+          duration = 2500;
+        } else {
+          duration = 1200;
+        }
+
+        const start = 0;
+        const frameRate = 60;
+        const totalFrames = Math.round((duration / 1000) * frameRate);
+        let frame = 0;
+
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+        const timer = setInterval(()=>{
+          frame++;
+          const progress = easeOutCubic(frame / totalFrames);
+          const current = start + (target - start) * progress;
+
+          el.textContent = formatNumberForDisplay(current, suffix);
+
+          if (frame >= totalFrames){
+            clearInterval(timer);
+            el.textContent = formatNumberForDisplay(target, suffix);
+          }
+        }, 1000 / frameRate);
+      }
+
+      function animateCounters(){
+        document.querySelectorAll('.kpi-value').forEach(el=>{
+          animateValue(el);
+        });
+      }
+
+      // Flip animation every 6sfront, 3s back
+      function flipCards() {
+        document.querySelectorAll('.kpi-card').forEach(card=>{
+          card.classList.toggle('flipped');
+        });
+
+        // If showing front now → animate counters
+        if (!document.querySelector('.kpi-card').classList.contains('flipped')) {
+          animateCounters();
+          // front duration = 5s
+          setTimeout(flipCards, 5000);
+        } else {
+          // back duration = 3s
+          setTimeout(flipCards, 3000);
+        }
+      }
+
+      // Start with front side showing + animate counters
+      animateCounters();
+      setTimeout(flipCards, 5000);
+
+    </script>
+
 
    </body>
 </html>
@@ -1444,7 +1657,8 @@ def index():
         summary2_df=summary2_df,
         summary3_df=summary3_df,
         listvessel_df=listvessel_df,
-        listdevice_df=listdevice_df
+        listdevice_df=listdevice_df,
+        kpis=kpis,   # ← add this line
     )
 
 @app.route('/login', methods=['GET', 'POST'])
