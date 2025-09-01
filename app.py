@@ -1017,8 +1017,9 @@ html_template = """
           <ul>
             <li><a id="nav-welcome" href="#" onclick="showSection('welcome')">Home</a></li>
             <li><a id="nav-list" href="#" onclick="showSection('list')">List</a></li>
-            <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">Analytics</a></li>
-            <li><a id="nav-report" href="#" onclick="showSection('report')">Report</a></li>
+            <li><a id="nav-apps" href="#" onclick="showSection('apps')">Apps</a></li>
+            <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a></li>
+            <li><a id="nav-report" href="#" onclick="showSection('report')">Docs</a></li>
             <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
           </ul>
         </nav>
@@ -1102,7 +1103,7 @@ html_template = """
             <div class="media media-img" style="background-image:url('{{ url_for('static', filename='britoilpic1.jpg') }}');"></div>
             <div class="body">
               <h4>Company Sustainability vision</h4>
-              <p>How we see the journey for Britoil vessels.</p>
+              <p>How we see the journey for Britoil company.</p>
               <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
             </div>
           </a>
@@ -1124,12 +1125,13 @@ html_template = """
         <div id="purpose" class="section-block split reveal">
           <div>
             <h3>What is <span class="green">Sustaina</span><span class="purple">BOS</span>?</h3>
-            <p>Internal platform to track solutions, quantify savings and compare vessel performance with extra analytics.</p>
+            <p>Internal platform to track solutions, gather apps, quantify savings and compare vessel performance with extra analytics.</p>
             <ul class="checklist">
               <li><i data-lucide="check-circle-2"></i><span>Track the implementation of new solutions across vessels.</span></li>
               <li><i data-lucide="check-circle-2"></i><span>Consolidate cost/CO₂-eq savings and progress.</span></li>
-              <li><i data-lucide="check-circle-2"></i><span>Benchmark vessels and identify opportunities.</span></li>
-              <li><i data-lucide="check-circle-2"></i><span>Dive deeper with Analytics (see section).</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Gather the Apps used by Britoil to power their usage.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Benchmark vessels and identify opportunities with KPI's.</span></li>
+              <!-- <li><i data-lucide="check-circle-2"></i><span>Dive deeper with Analytics (see section).</span></li> -->
             </ul>
             <div class="chips">
              <span class="chip">Fleet view</span>
@@ -1175,10 +1177,11 @@ html_template = """
           <div>
             <h3>Our vision for Britoil vessels</h3>
             <ul class="checklist">
-             <li><i data-lucide="check-circle-2"></i><span>Adopt proven efficiency tech (LED, filtration, monitoring).</span></li>
-             <li><i data-lucide="check-circle-2"></i><span>Measure what matters: cost & CO₂-eq savings per vessel.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Adopt proven efficiency Tech's (LED, filtration, monitoring).</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Driving digital transition with innovative technology adoption.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Explore new energy possibilities,bio-fuel, reconversion.  </span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Measure what matters: fuel, cost & CO₂-eq savings per vessel.</span></li>
              <li><i data-lucide="check-circle-2"></i><span>Share insights between regions and speed up roll-outs.</span></li>
-             <li><i data-lucide="check-circle-2"></i><span>Report clearly—support the annual Sustainability Report.</span></li>
             </ul>
             <p style="margin-top:10px;">Powered by Axel FAURAX & the Technical Department.</p>
           </div>
@@ -1192,10 +1195,11 @@ html_template = """
           <div>
             <h3>Our ESG vision for Britoil </h3>
             <ul class="checklist">
-             <li><i data-lucide="check-circle-2"></i><span>Adopt proven efficiency tech (LED, filtration, monitoring).</span></li>
-             <li><i data-lucide="check-circle-2"></i><span>Measure what matters: cost & CO₂-eq savings per vessel.</span></li>
-             <li><i data-lucide="check-circle-2"></i><span>Share insights between regions and speed up roll-outs.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Integrate environemantal solutions for the vessels.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Drive Social and Governance initiatives such as CSR</span></li>
              <li><i data-lucide="check-circle-2"></i><span>Report clearly—support the annual Sustainability Report.</span></li>
+             <li><i data-lucide="check-circle-2"></i><span>Share insights between regions and speed up ESG actions.</span></li>
+             
             </ul>
             <p style="margin-top:10px;">Powered by Axel FAURAX & the Technical Department.</p>
           </div>
@@ -1395,6 +1399,137 @@ html_template = """
           {% endfor %}
       </div>
 
+      <div id="apps" class="section content hidden">
+        <h2 class="section-title">Apps</h2>
+
+        <!-- Reuse the same grid class as Home -->
+        <div class="home-feature-grid apps-grid reveal">
+
+          <!-- 1 -->
+          <a href="https://crm.iwtm.com" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='IWTMlogo.jpg') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>IWT CMR</h4>
+             <p>Water Analysis IWTM P10</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 2 -->
+          <a href="https://app.shipin.ai" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='ShipInlogo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>ShipIn</h4>
+             <p>AI CCTV System by Shipin</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 3 -->
+          <a href="https://unisea.britoil.com.sg" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='unisealogo.jpg') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>Unisea Emissions</h4>
+             <p>Emissions and BI module by Unisea</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 4 -->
+          <a href="https://app.nautiluslog.com" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='nloglogo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>Nautilus Log</h4>
+             <p>Inspection Report, Defect KPI's, VRR</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 5 -->
+          <a href="https://tsl360.tractors.com.sg/login" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='tsl360logo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>TSL360</h4>
+             <p>Generators monitoring by CAT </p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 6 -->
+          <a href="https://rms.egenkit.com/#/" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='egenkitlogo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>e-Gen KIT</h4>
+             <p> Fuel monitoring, PPTEP's vessels </p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 7 -->
+          <a href="https://www.britoil.com.sg" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='hempellogo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>Hempel Shape</h4>
+             <p>Hull Analysis by Hemple</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 8 -->
+          <a href="https://www.britoil.com.sg" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='spinergielogo.jpg') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>Spinergie</h4>
+             <p>Spinergie Fleet Management </p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+          <!-- 9 -->
+          <a href="https://britoilos.sharepoint.com/sites/Vessel-Library" target="_blank" class="feature-card" style="text-decoration:none;">
+           <div class="media media-img" style="
+             background-image:url('{{ url_for('static', filename='SharePointlogo.png') }}');
+             background-size: contain; background-repeat:no-repeat; background-position:center; background-color:#f7fafc;">
+           </div>
+           <div class="body">
+             <h4>SharePoint</h4>
+             <p>Britoil SharePoint all documentd</p>
+             <span class="readmore">Go to App <i data-lucide="arrow-right"></i></span>
+           </div>
+          </a>
+
+        </div>
+        <br>
+
+        <h2>Credentials - Login</h2>
+        <p> If you need some credentials, please ask directly, you can see my contact in the contact section. </p>
+
+      </div>
+
       <div id="analytics" class="section content hidden">
           <h2>Analytics</h2>
 
@@ -1499,11 +1634,15 @@ html_template = """
            <h3>📄 Reports & Studies</h3>
              <ul style="list-style-type: none; padding-left: 20; margin:0;">
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EevaaGdd2I9Fix-ihhTTSpUBCljoFEfPWiLaBlCzBlQ3GA?e=wboRxn" target="_blank">🔗 LED Light Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/ESAgxiOZdI5ItoEM3b3UJd8BJzCXiz4DgVrjGgRRx06YcA?e=pMHIEj" target="_blank">🔗 AI CCTV Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EYadKUz1ndFGjab-1unbFBkB0diXBP36hvg2i0Bw240Ysg?e=UkaSer" target="_blank">🔗 MGPS Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/ERMqIzIiewBClWQiLKocjN8BdIuo2Ks6AVInt9oKMa-LZQ?e=dgdPCi" target="_blank">🔗 EFMS Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ea132zQliBVAu4Gc_H4ZSZcBzIcYKu7CWsLZGsyiaSCX5A?e=mqJhyx" target="_blank">🔗 IWTM Filters Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EQcq4o4Y5LpJgolosjOT5ncBuy-rpGnWClYvaNn6pmziAw?e=Kr5XTK" target="_blank">🔗 Fleet Management System Pre-Study</a></li>               
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ee3lqUA0Cl5ApvCfcGaexv0BIv881MnJPRGPFBxgYCMPjw?e=oFyS5x" target="_blank">🔗 New Initiatives Presentation – Dubai 2024</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/EXAFSkLNyppFtbHGKCwqRyABAuUzok_kEdlRdhw-UxKoLQ?e=gyBv4R" target="_blank">🔗 New Initiatives 2025</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EUIW-XYFTjtBqBRw9ODl23QBJQ6Ctds1Tqsg3Ybid_-z-Q?e=rTh3e9" target="_blank">🔗 VFD Study</a></li>
+
              </ul>
          </div>
 
