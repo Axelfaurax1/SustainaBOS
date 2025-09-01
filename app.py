@@ -21,7 +21,10 @@ users = {
     "admin": "secret123",
     "Mohit": "BOSmosa*",
     "Florent": "BOSflki*",
-    "Julian": "BOSjuoh*"
+    "Julian": "BOSjuoh*",
+    "Richard": "BOSrihi*",
+    "Ernest": "BOSerlo*",
+    "Sundar": "BOSsucc*",
 }
 
 
