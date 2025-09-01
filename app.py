@@ -316,6 +316,35 @@ html_template = """
            object-fit: contain;
            }
 
+        #fab-menu {
+          position: fixed;
+          bottom: 110px;  /* stack above FAB */
+          right: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.3s, transform 0.3s;
+          z-index: 999;
+        }
+
+        #fab-menu.show {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        #fab-menu button {
+          background: var(--brand-purple);
+          color: #fff;
+          border: none;
+          border-radius: 20px;
+          padding: 8px 14px;
+          cursor: pointer;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+          font-size: 0.9rem;
+        }
+
         #splash {
            position: fixed;
            top: 0;
@@ -963,9 +992,15 @@ html_template = """
     </div>
     </div>
 
-    <a href="javascript:void(0);" id="fab-button" title="Reload Page">
+    <a href="javascript:void(0);" id="fab-button" title="Menu">
     <img src="{{ url_for('static', filename='green_leaf.png') }}" alt="FAB Logo">
     </a>
+
+    <div id="fab-menu" class="hidden">
+      <button onclick="openChat()">Chat</button>
+      <button onclick="refreshPage()">Refresh</button>
+      <button onclick="logout()">Logout</button>
+    </div>
 
     <header>
       <div class="container">
@@ -1523,9 +1558,26 @@ html_template = """
       setTimeout(function () {
          document.getElementById('splash').style.display = 'none';
       }, 2500);
-      document.getElementById("fab-button").addEventListener("click", function() {
-            location.reload(); // Reloads the current page
-        });
+
+      // fab menu event fonction
+      const fabButton = document.getElementById("fab-button");
+      const fabMenu = document.getElementById("fab-menu");
+
+      fabButton.addEventListener("click", () => {
+        fabMenu.classList.toggle("show");
+      });
+
+      function refreshPage() {
+        location.reload();
+      }
+
+      function logout() {
+        window.location.href = "/logout";  // redirect to login page
+      }
+
+      function openChat() {
+        alert("Chat feature coming soon!");
+      }
   
       window.onload = function() {
             showSection('welcome');
@@ -1684,10 +1736,10 @@ def login():
     <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Login</title>
+        <title>Login- SustainaBOS</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: 'Segoe UI', sans-serif;
                 background: url('/static/imagelogin.JPG') no-repeat center center fixed;
                 background-size: cover;
                 display: flex;
@@ -1698,34 +1750,48 @@ def login():
             }}
             .login-container {{
                 background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(6px);
                 padding: 40px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
                 text-align: center;
-                width: 350px;
+                width: 340px;
             }}
+            .login-container img {{
+            width: 60px;
+            margin-bottom: 15px;
+            }}
+
             .login-container h2 {{
                 margin-bottom: 20px;
+                color: var(--brand-purple, #6a1b9a);
             }}
             .login-container input {{
                 width: 100%;
-                padding: 10px;
+                padding: 12px;
                 margin: 8px 0;
                 border: 1px solid #ccc;
-                border-radius: 6px;
+                border-radius: 8px;
+                font-size: 14px;
+                box-sizing: border-box; /* keep consistent sizing */
             }}
             .login-container button {{
                 width: 100%;
                 padding: 12px;
-                background: #007BFF;
+                margin-top: 12px;  /* add spacing below password input */
+                background: var(--brand-purple, #6a1b9a);
                 color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 cursor: pointer;
-                font-size: 16px;
+                font-size: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                transition: transform 0.2s;
+                box-sizing: border-box; /* match input sizing */
             }}
             .login-container button:hover {{
-                background: #0056b3;
+                transform: translateY(-2px);
+                background: #5e1785;
             }}
             .error {{
                 color: red;
@@ -1735,11 +1801,12 @@ def login():
     </head>
     <body>
         <div class="login-container">
-            <h2>Please Sign In</h2>
+            <img src="/static/green_leaf.png" alt="Logo">
+            <h2>SustainaBOS Login</h2>
             {f'<p class="error">{error}</p>' if error else ''}
             <form method="post">
-                <input type="text" name="username" placeholder="Username" required><br>
-                <input type="password" name="password" placeholder="Password" required><br>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
             </form>
         </div>
