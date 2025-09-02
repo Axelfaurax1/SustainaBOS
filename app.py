@@ -1890,7 +1890,7 @@ html_template = """
                     loadChatMessages();  // refresh
                   })
                   .catch(err => console.error("Chat send error:", err));
-
+                }
             });
 
             // Function to load all chat messages from DB
