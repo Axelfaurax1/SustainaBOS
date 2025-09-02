@@ -1879,14 +1879,18 @@ html_template = """
               const msg = input.value.trim();
               if (msg !== "") {
                 fetch("/chat", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ message: msg })
-                })
-                .then(res => res.json())
-                .then(() => loadChatMessages());  // reload messages after saving
-                input.value = "";
-              }
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      message: msg
+                    })
+                  })
+                  .then(res => res.json())
+                  .then(() => {
+                    loadChatMessages();  // refresh
+                  })
+                  .catch(err => console.error("Chat send error:", err));
+
             });
 
             // Function to load all chat messages from DB
