@@ -4,15 +4,55 @@ from flask import Flask, render_template_string, request, redirect, url_for, ses
 import os
 import smtplib
 from email.mime.text import MIMEText
+from flask_sqlalchemy import SQLAlchemy
+
+# Create a Flask app
+app = Flask(__name__)
+
+# Database connection (Render provides DATABASE_URL in env vars)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://sustainabos_db_user:iNmAcRXSGKOSHgvQGzltdBUSMcDz0dZN@dpg-d2r54315pdvs738sd3i0-a/sustainabos_db")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+# --- models ---
+class Survey(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vessel_name = db.Column(db.String(100))
+    date = db.Column(db.Date)
+    responses = db.Column(db.JSON)
+
+class Metric(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    metric_name = db.Column(db.String(100))
+    value = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(50))
+    message = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+class DeviceLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    action = db.Column(db.String(100))
+    vessel_name = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
 
 # To ignore warnings of openxyl, excel sheet weird format
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
-
-# Create a Flask app
-app = Flask(__name__)
-
+# For the password later
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-now")  # set a real value in Render later
 
 # --- Simple users (change these!) ---
@@ -744,6 +784,91 @@ html_template = """
        color: var(--muted);
     }
 
+      /* Chat window basic design */
+      #chat-window {
+        position: fixed;
+        bottom: 100px;   /* sits above FAB */
+        right: 20px;
+        width: 300px;
+        height: 250px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1200;
+        transition: transform .2s ease, opacity .2s ease;
+      }
+
+      /* hidden by default */
+      .chat-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+      }
+
+      /* visible state */
+      .chat-visible {
+         opacity: 1;
+         pointer-events: auto;
+         transform: translateY(0);
+      }
+
+      .chat-header {
+        background: linear-gradient(90deg, var(--brand-purple), var(--brand-green));
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+      }
+
+      .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .chat-body {
+          flex: 1;
+          padding: 12px;
+          font-size: 0.9rem;
+          color: var(--muted);
+      }
+
+      .chat-input {
+        display: flex;
+        border-top: 1px solid var(--border);
+      }
+
+      .chat-input input {
+         flex: 1;
+         border: none;
+         padding: 10px;
+         font-size: 0.9rem;
+         border-radius: 0;
+         outline: none;
+      }
+
+      .chat-input button {
+        background: var(--brand-purple);
+        color: white;
+        border: none;
+        padding: 0 16px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: background 0.2s;
+      }
+
+      .chat-input button:hover {
+         background: var(--brand-green);
+      }
+
          
     </style>
     <script>
@@ -1004,6 +1129,22 @@ html_template = """
       <button onclick="refreshPage()">Refresh</button>
       <button onclick="logout()">Logout</button>
     </div>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-hidden">
+      <div class="chat-header">
+        <span>Sustainabos Chat</span>
+        <button onclick="closeChat()" class="chat-close">✕</button>
+      </div>
+      <div class="chat-body">
+        <p><em>Chat coming soon...</em></p>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chat-input-field" placeholder="Type a message...">
+        <button id="chat-send">➤</button>
+      </div>
+    </div>
+
 
     <header>
       <div class="container">
@@ -1718,13 +1859,49 @@ html_template = """
       }
 
       function openChat() {
-        alert("Chat feature coming soon!");
+        const chat = document.getElementById("chat-window");
+        chat.classList.remove("chat-hidden");
+        chat.classList.add("chat-visible");
       }
+
+      function closeChat() {
+        const chat = document.getElementById("chat-window");
+        chat.classList.remove("chat-visible");
+        chat.classList.add("chat-hidden");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const sendBtn = document.getElementById("chat-send");
+        const input = document.getElementById("chat-input-field");
+        const chatBody = document.getElementById("chat-body");
+
+        if (sendBtn && input && chatBody) {
+           sendBtn.addEventListener("click", function () {
+             const msg = input.value.trim();
+             if (msg !== "") {
+               const newMsg = document.createElement("p");
+               newMsg.textContent = msg;
+               chatBody.appendChild(newMsg);
+               chatBody.scrollTop = chatBody.scrollHeight;
+               input.value = "";
+             }
+          });
+
+          // (optional) Press Enter to send
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              sendBtn.click();
+            }
+          });
+        }
+      });
+
+
   
       window.onload = function() {
             showSection('welcome');
+      };   
 
-      };
    </script>
 
    <script>
@@ -1987,6 +2164,12 @@ def notify_new_device():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@app.route("/init-db")
+def init_db():
+    with app.app_context():
+        db.create_all()
+    return "Database initialized!"
 
 if __name__ == '__main__':
     app.run(debug=True)
