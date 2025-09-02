@@ -268,7 +268,7 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('static/top_vessels_chart.png')
 
-
+#region HTML section
 # HTML template for the website with improved design and images
 html_template = """
 <!DOCTYPE html>
@@ -784,93 +784,120 @@ html_template = """
        color: var(--muted);
     }
 
-      /* Chat window basic design */
-      #chat-window {
+      /* Chat widget styles */
+      #chat-widget {
         position: fixed;
-        bottom: 100px;   /* sits above FAB */
+        bottom: 100px; /* adjust so it sits above FAB */
         right: 20px;
-        width: 300px;
-        height: 250px;
+        width: 320px;
+        max-width: calc(100vw - 40px);
         background: #fff;
-        border: 1px solid var(--border);
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        border: 1px solid var(--border);
+        box-shadow: 0 14px 40px rgba(16,24,40,0.12);
         display: flex;
         flex-direction: column;
         overflow: hidden;
         z-index: 1200;
-        transition: transform .2s ease, opacity .2s ease;
+        transform-origin: bottom right;
+        transition: transform .18s ease, opacity .18s ease;
       }
 
-      /* hidden by default */
+      /* hidden state */
       .chat-hidden {
         opacity: 0;
+        transform: scale(.96) translateY(8px);
         pointer-events: none;
-        transform: translateY(10px);
       }
 
       /* visible state */
       .chat-visible {
-         opacity: 1;
-         pointer-events: auto;
-         transform: translateY(0);
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: auto;
       }
 
       .chat-header {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:10px 12px;
         background: linear-gradient(90deg, var(--brand-purple), var(--brand-green));
-        color: white;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
+        color: #fff;
       }
-
-      .chat-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
+      .chat-title { font-weight:700; font-size:0.95rem; }
+      #chat-close {
+        background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;
       }
 
       .chat-body {
-          flex: 1;
-          padding: 12px;
-          font-size: 0.9rem;
-          color: var(--muted);
+        padding: 12px;
+        min-height: 110px;
+        max-height: 240px;
+        overflow: auto;
+        background: #fafbfd;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
       }
 
+      /* message bubbles */
+      .msg {
+        max-width: 86%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height:1.25;
+        box-shadow: 0 6px 16px rgba(14,20,30,0.04);
+        word-wrap: break-word;
+      }
+      .msg.me {
+        align-self: flex-end;
+        background: linear-gradient(90deg, #dff7ea, #e9fff4);
+        color: #044b22;
+        border-bottom-right-radius: 6px;
+      }
+      .msg.them {
+        align-self: flex-start;
+        background: #fff;
+        color: #1b1b1b;
+        border-bottom-left-radius: 6px;
+      }
+
+      /* meta small line */
+      .msg-meta { display:block; font-size:0.72rem; color:var(--muted); margin-top:6px; opacity:0.9; }
+
+      /* input */
       .chat-input {
-        display: flex;
+        display:flex;
+        gap:8px;
+        padding:10px;
         border-top: 1px solid var(--border);
       }
-
-      .chat-input input {
-         flex: 1;
-         border: none;
-         padding: 10px;
-         font-size: 0.9rem;
-         border-radius: 0;
-         outline: none;
+      #chat-text {
+        flex:1;
+        padding:10px 12px;
+        border-radius:8px;
+        border:1px solid var(--border);
+        font-size:0.95rem;
+        box-sizing:border-box;
       }
-
-      .chat-input button {
+      #chat-send {
         background: var(--brand-purple);
-        color: white;
-        border: none;
-        padding: 0 16px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: background 0.2s;
+        color:#fff;
+        border:none;
+        padding: 8px 12px;
+        border-radius:8px;
+        cursor:pointer;
+      }
+      @media (max-width:480px){
+        #chat-widget { width: 92vw; right:4%; bottom: 90px; }
       }
 
-      .chat-input button:hover {
-         background: var(--brand-green);
-      }
 
-         
+              
     </style>
+
     <script>
         function toggleVisibility(id) {
             var element = document.getElementById(id);
@@ -1112,6 +1139,7 @@ html_template = """
 
     
 </head>
+
 <body>
     <div id="splash">
     <img src="{{ url_for('static', filename='green_leaf.png') }}" alt="Logo" id="splash-logo">
@@ -2044,6 +2072,8 @@ html_template = """
    </body>
 </html>
 """
+
+#region App route
 
 @app.route('/')
 def index():
