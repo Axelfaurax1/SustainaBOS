@@ -1137,7 +1137,6 @@ html_template = """
         <button onclick="closeChat()" class="chat-close">✕</button>
       </div>
       <div class="chat-body">
-        <p><em>Chat coming soon...</em></p>
       </div>
       <div class="chat-input">
         <input type="text" id="chat-input-field" placeholder="Type a message...">
@@ -1877,15 +1876,42 @@ html_template = """
 
         if (sendBtn && input && chatBody) {
            sendBtn.addEventListener("click", function () {
-             const msg = input.value.trim();
-             if (msg !== "") {
-               const newMsg = document.createElement("p");
-               newMsg.textContent = msg;
-               chatBody.appendChild(newMsg);
-               chatBody.scrollTop = chatBody.scrollHeight;
-               input.value = "";
-             }
-          });
+              const msg = input.value.trim();
+              if (msg !== "") {
+                fetch("/chat", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ message: msg })
+                })
+                .then(res => res.json())
+                .then(() => loadChatMessages());  // reload messages after saving
+                input.value = "";
+              }
+            });
+
+            // Function to load all chat messages from DB
+            function loadChatMessages() {
+              fetch("/chat")
+                .then(res => res.json())
+                .then(data => {
+                  chatBody.innerHTML = ""; // clear old
+                  data.forEach(msg => {
+                    const p = document.createElement("p");
+                    p.textContent = msg.user + ": " + msg.message;
+                    chatBody.appendChild(p);
+                  });
+                  chatBody.scrollTop = chatBody.scrollHeight;
+                });
+            }
+
+            // Call this when chat window opens
+            window.openChat = function () {
+              const chat = document.getElementById("chat-window");
+              chat.classList.remove("chat-hidden");
+              chat.classList.add("chat-visible");
+              loadChatMessages();
+            };
+
 
           // (optional) Press Enter to send
           input.addEventListener("keypress", function (e) {
@@ -2139,6 +2165,28 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
+@app.route("/chat", methods=["GET", "POST"])
+def chat():
+    if request.method == "POST":
+        data = request.get_json()
+        msg = data.get("message", "").strip()
+        user = session.get("user", "Anonymous")
+
+        if msg:
+            new_msg = ChatMessage(user=user, message=msg)
+            db.session.add(new_msg)
+            db.session.commit()
+
+        return jsonify({"status": "ok"})
+
+    else:  # GET request
+        messages = ChatMessage.query.order_by(ChatMessage.timestamp.asc()).all()
+        return jsonify([
+            {"user": m.user, "message": m.message, "time": m.timestamp.isoformat()}
+            for m in messages
+        ])
+
+
 @app.route('/notify_new_device', methods=['POST'])
 def notify_new_device():
     data = request.json
@@ -2153,6 +2201,11 @@ def notify_new_device():
     msg['From'] = sender
     msg['To'] = recipient
 
+    # Log into database
+    log = DeviceLog(action="add_device", vessel_name=vessel, device_name=device)
+    db.session.add(log)
+    db.session.commit()
+
     try:
         # Connect to your mail server (Office365)
         with smtplib.SMTP(os.getenv("SMTP_SERVER", "smtp.office365.com"), int(os.getenv("SMTP_PORT", 587))) as server:
@@ -2165,11 +2218,11 @@ def notify_new_device():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@app.route("/init-db")
-def init_db():
-    with app.app_context():
-        db.create_all()
-    return "Database initialized!"
+#@app.route("/init-db")
+#def init_db():
+    #with app.app_context():
+        #db.create_all()
+    #return "Database initialized!"
 
 if __name__ == '__main__':
     app.run(debug=True)
