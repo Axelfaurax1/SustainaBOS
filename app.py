@@ -2154,7 +2154,7 @@ def login():
                 display: block;
                 width: 100%;
                 padding: 12px;
-                margin-top: 25px; /* add spacing below login button */
+                margin-top: 55px; /* add spacing below login button */
                 background: var(--brand-purple, #6a1b9a);
                 color: white;
                 text-align: center;
@@ -2196,8 +2196,10 @@ def login():
 
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
-    vessels = list(listvessel_df)  # your DataFrame
-    devices = list(listdevice_df)  # 15 devices
+    vessels = list(listvessel_df['BOS DUBAI'])  # your DataFrame
+    print(vessels)
+    devices = list(listdevice_df['Device'])  # 15 devices
+    print(devices)
 
     # GET -> render survey form
     #vessels = [v.strip() for v in list(listdevice_df['Vessel Name'].unique())]  # or your vessel list
