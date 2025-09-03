@@ -2084,8 +2084,9 @@ def login():
             session['user'] = username
 
             #Short line section for metrics of login
-            log = Metric(username=username, metric_name="login")
             print(username)
+            log = Metric(value=username, metric_name="login")
+            
             db.session.add(log)
             db.session.commit()
 
@@ -2196,7 +2197,7 @@ def login():
                 <button type="submit">Login</button>
             </form>
             <!-- Vessel survey button -->
-            <h2>For Crew :</h2>
+            <h2>For Crew</h2>
             <a href="/survey" class="survey-button">Vessel Survey</a>
         </div>
     </body>
