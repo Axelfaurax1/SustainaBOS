@@ -1,10 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, flash
 import os
 import smtplib
 from email.mime.text import MIMEText
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 # Create a Flask app
 app = Flask(__name__)
@@ -73,7 +74,7 @@ file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=428, usecols="B:J")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=455, usecols="B:J")
 
 # Load the summary sheet
 summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=16, usecols="A:F")
@@ -230,7 +231,7 @@ def get_device_summary_route():
 #print(M)
 
 # Load the list of vessel
-listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=24,  nrows=70, usecols="A")
+listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=24,  nrows=73, usecols="A")
 
 # Load the list of devices
 listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=15, usecols="A")
@@ -268,7 +269,7 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('static/top_vessels_chart.png')
 
-
+#region HTML section
 # HTML template for the website with improved design and images
 html_template = """
 <!DOCTYPE html>
@@ -1136,7 +1137,7 @@ html_template = """
         <span>Sustainabos Chat</span>
         <button onclick="closeChat()" class="chat-close">✕</button>
       </div>
-      <div class="chat-body">
+      <div id="chat-body" class="chat-body">
       </div>
       <div class="chat-input">
         <input type="text" id="chat-input-field" placeholder="Type a message...">
@@ -1252,7 +1253,7 @@ html_template = """
           <a href="#report" class="feature-card" style="text-decoration:none;">
             <div class="media media-img" style="background-image:url('{{ url_for('static', filename='reportex.jpg') }}');"></div>
             <div class="body">
-              <h4>Sustainability Report 2024</h4>
+              <h4>Sustainability Report 2025</h4>
               <p>The last sustainability report produced by the company.</p>
               <span class="readmore">Read more <i data-lucide="arrow-right"></i></span>
             </div>
@@ -2045,6 +2046,9 @@ html_template = """
 </html>
 """
 
+#region Apps route
+
+
 @app.route('/')
 def index():
     if 'user' not in session:
@@ -2159,10 +2163,176 @@ def login():
                 <button type="submit">Login</button>
             </form>
         </div>
+        <div style="margin-top: 20px;">
+          <a href="{{ url_for('survey') }}">
+            <button type="button" style="width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
+              Vessel Survey
+            </button>
+          </a>
+        </div>
+
     </body>
     </html>
     """
     return login_page
+
+@app.route("/survey", methods=["GET", "POST"])
+def survey():
+    vessels = list(listvessel_df['Vessel'])  # your DataFrame
+    devices = list(listdevice_df['Device'])  # 15 devices
+
+    if request.method == "POST":
+        vessel_name = request.form.get("vessel")
+        responses = {}
+        for device in devices:
+            responses[device] = request.form.get(device)
+
+        new_survey = Survey(
+            vessel_name=vessel_name,
+            date=datetime.utcnow().date(),
+            responses=responses
+        )
+        db.session.add(new_survey)
+        db.session.commit()
+        flash("Survey submitted successfully!", "success")
+        return redirect(url_for("login"))
+
+    # Render survey form
+    survey_html = f"""
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>Vessel Survey</title>
+      <style>
+        body {{
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          background: #f9f9f9;
+        }}
+        .survey-container {{
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          max-width: 700px;
+          margin: auto;
+        }}
+        h2 {{
+          text-align: center;
+          color: var(--brand-purple, #6a1b9a);
+        }}
+        select, button {{
+          margin: 5px 0;
+          padding: 8px;
+          font-size: 14px;
+          border-radius: 6px;
+        }}
+        .device-row {{
+          margin-bottom: 12px;
+        }}
+        button {{
+          background: var(--brand-purple, #6a1b9a);
+          color: white;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+          padding: 12px;
+          font-size: 16px;
+        }}
+        button:hover {{
+          background: var(--brand-green, #2e7d32);
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="survey-container">
+        <h2>Vessel Survey</h2>
+        <form method="post">
+          <label for="vessel">Select Vessel:</label>
+          <select name="vessel" required>
+            {''.join([f"<option value='{v}'>{v}</option>" for v in vessels])}
+          </select>
+          <hr>
+          <h3>Devices</h3>
+    """
+
+    # Add dropdown for each device
+    for device in devices:
+        survey_html += f"""
+        <div class="device-row">
+          <label>{device}:</label>
+          <select name="{device}" required>
+            <option value="">--Select--</option>
+            <option value="Done">Done</option>
+            <option value="No Need">No Need</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Not Installed">Not Installed</option>
+          </select>
+        </div>
+        """
+
+    survey_html += """
+          <button type="submit">Submit Survey</button>
+        </form>
+      </div>
+    </body>
+    </html>
+    """
+
+    return survey_html
+
+@app.route("/survey-results")
+def survey_results():
+    surveys = Survey.query.order_by(Survey.date.desc()).all()
+
+    results_html = """
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>Survey Results</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+        .survey-container { background: white; padding: 20px; border-radius: 12px;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-width: 900px; margin: auto; }
+        h2 { text-align: center; color: var(--brand-purple, #6a1b9a); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: var(--brand-purple, #6a1b9a); color: white; }
+        tr:nth-child(even) { background: #f3f3f3; }
+      </style>
+    </head>
+    <body>
+      <div class="survey-container">
+        <h2>Survey Results</h2>
+        <table>
+          <tr>
+            <th>Date</th>
+            <th>Vessel</th>
+            <th>Responses</th>
+          </tr>
+    """
+
+    for s in surveys:
+        responses_text = "<br>".join([f"<b>{k}</b>: {v}" for k, v in s.responses.items()])
+        results_html += f"""
+          <tr>
+            <td>{s.date}</td>
+            <td>{s.vessel_name}</td>
+            <td>{responses_text}</td>
+          </tr>
+        """
+
+    results_html += """
+        </table>
+      </div>
+    </body>
+    </html>
+    """
+
+    return results_html
+
 
 @app.route('/logout')
 def logout():
