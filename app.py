@@ -7,6 +7,10 @@ from email.mime.text import MIMEText
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+#from datetime import timedelta
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)  # or days=1
+#Thus is for the time for session after login, directly see session permanent=true line
+
 # Create a Flask app
 app = Flask(__name__)
 
@@ -2077,7 +2081,7 @@ def login():
 
         if username in users and users[username] == password:
             session['user'] = username
-            session.permanent = True
+            # session.permanent = True. #If add, every 31 days. If remove, when browser close
             return redirect(url_for('index'))
         else:
             error = "Invalid username or password"
@@ -2146,6 +2150,23 @@ def login():
                 transform: translateY(-2px);
                 background: #5e1785;
             }}
+            .survey-button {{
+                display: block;
+                width: 100%;
+                padding: 12px;
+                margin-top: 15px;
+                background: var(--brand-purple, #6a1b9a);
+                color: white;
+                text-align: center;
+                border-radius: 6px;
+                text-decoration: none;
+                font-size: 16px;
+                font-weight: bold;
+                transition: background 0.2s;
+            }}
+            .survey-button:hover {{
+                background: var(--brand-green, #2e7d32);
+            }}
             .error {{
                 color: red;
                 margin-bottom: 15px;
@@ -2162,6 +2183,8 @@ def login():
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
             </form>
+            <!-- Vessel survey button -->
+            <a href="/survey" class="survey-button">Vessel Survey</a>
         </div>
         <div style="margin-top: 20px;">
           <a href="{{ url_for('survey') }}">
