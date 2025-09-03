@@ -70,6 +70,7 @@ users = {
     "Richard": "BOSrihi*",
     "Ernest": "BOSerlo*",
     "Sundar": "BOSsucc*",
+    "Ser Boon": "BOSseta*",
 }
 
 
@@ -1115,7 +1116,7 @@ html_template = """
 
     </script>
 
-    
+
 </head>
 <body>
     <div id="splash">
@@ -2081,6 +2082,13 @@ def login():
 
         if username in users and users[username] == password:
             session['user'] = username
+
+            #Short line section for metrics of login
+            log = Metric(username=username, metric_name="login")
+            print(username)
+            db.session.add(log)
+            db.session.commit()
+
             # session.permanent = True. #If add, every 31 days. If remove, when browser close
             return redirect(url_for('index'))
         else:
@@ -2136,6 +2144,7 @@ def login():
                 width: 100%;
                 padding: 12px;
                 margin-top: 12px;  /* add spacing below password input */
+                margin-bottom: 30px; /* add spacing above text for survey input */
                 background: var(--brand-purple, #6a1b9a);
                 color: white;
                 border: none;
@@ -2154,7 +2163,7 @@ def login():
                 display: block;
                 width: 100%;
                 padding: 12px;
-                margin-top: 55px; /* add spacing below login button */
+                margin-top: 15px; /* add spacing below text */
                 background: var(--brand-purple, #6a1b9a);
                 color: white;
                 text-align: center;
@@ -2187,6 +2196,7 @@ def login():
                 <button type="submit">Login</button>
             </form>
             <!-- Vessel survey button -->
+            <h2>For Crew :</h2>
             <a href="/survey" class="survey-button">Vessel Survey</a>
         </div>
     </body>
@@ -2197,9 +2207,9 @@ def login():
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
     vessels = list(listvessel_df['BOS DUBAI'])  # your DataFrame
-    print(vessels)
+    #print(vessels)
     devices = list(listdevice_df['Device'])  # 15 devices
-    print(devices)
+    #print(devices)
 
     # GET -> render survey form
     #vessels = [v.strip() for v in list(listdevice_df['Vessel Name'].unique())]  # or your vessel list
