@@ -2186,14 +2186,6 @@ def login():
             <!-- Vessel survey button -->
             <a href="/survey" class="survey-button">Vessel Survey</a>
         </div>
-        <div style="margin-top: 20px;">
-          <a href="{{ url_for('survey') }}">
-            <button type="button" style="width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
-              Vessel Survey
-            </button>
-          </a>
-        </div>
-
     </body>
     </html>
     """
