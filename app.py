@@ -2085,7 +2085,7 @@ def login():
 
             #Short line section for metrics of login
             print(username)
-            log = Metric(value=username, metric_name="login")
+            log = Metric(metric_name=username, value=0)
             
             db.session.add(log)
             db.session.commit()
