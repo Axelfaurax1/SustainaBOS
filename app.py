@@ -2148,23 +2148,26 @@ def login():
             }}
             .login-container button:hover {{
                 transform: translateY(-2px);
-                background: #5e1785;
+                background: var(--brand-green, #2e7d32);
             }}
             .survey-button {{
                 display: block;
                 width: 100%;
                 padding: 12px;
-                margin-top: 15px;
+                margin-top: 25px; /* add spacing below login button */
                 background: var(--brand-purple, #6a1b9a);
                 color: white;
                 text-align: center;
-                border-radius: 6px;
+                border-radius: 8px;
                 text-decoration: none;
-                font-size: 16px;
-                font-weight: bold;
+                font-size: 15px;
+                /* font-weight: bold; */
                 transition: background 0.2s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                box-sizing: border-box; /* match input sizing */
             }}
             .survey-button:hover {{
+                transform: translateY(-2px);
                 background: var(--brand-green, #2e7d32);
             }}
             .error {{
@@ -2193,8 +2196,12 @@ def login():
 
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
-    vessels = list(listvessel_df['Vessel'])  # your DataFrame
-    devices = list(listdevice_df['Device'])  # 15 devices
+    vessels = list(listvessel_df)  # your DataFrame
+    devices = list(listdevice_df)  # 15 devices
+
+    # GET -> render survey form
+    #vessels = [v.strip() for v in list(listdevice_df['Vessel Name'].unique())]  # or your vessel list
+    #devices = [d.strip() for d in list(listdevice_df['Device'].unique())]      # your 15 initiatives
 
     if request.method == "POST":
         vessel_name = request.form.get("vessel")
