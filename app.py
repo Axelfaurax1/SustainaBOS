@@ -71,6 +71,8 @@ users = {
     "Ernest": "BOSerlo*",
     "Sundar": "BOSsucc*",
     "Ser Boon": "BOSseta*",
+    "Siva": "BOSsira*",
+    "Alessandro":"BOSalba*",
 }
 
 
@@ -803,8 +805,8 @@ html_template = """
         box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         display: flex;
         flex-direction: column;
-        /* overflow: hidden; */ to remove for moment as it's compromising input bar
-        z-index: 99999; */ on top of everything
+        /* overflow: hidden; to remove for moment as it's compromising input bar */
+        z-index: 99999;  /* on top of everything */
         transition: transform .2s ease, opacity .2s ease;
       }
 
