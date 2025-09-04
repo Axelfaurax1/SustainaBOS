@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, flash, abort
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -804,7 +804,7 @@ html_template = """
         display: flex;
         flex-direction: column;
         /* overflow: hidden; */ to remove for moment as it's compromising input bar
-        z-index: 1200;
+        z-index: 20000;
         transition: transform .2s ease, opacity .2s ease;
       }
 
@@ -1137,7 +1137,7 @@ html_template = """
     <div id="fab-menu" class="hidden">
       <button onclick="openChat()">Chat</button>
       <button onclick="refreshPage()">Refresh</button>
-      <button onclick="logout()">Logout</button>
+      <button onclick="openAdminOrLogout()">Admin</button>
     </div>
 
     <!-- Chat Window -->
@@ -1171,6 +1171,11 @@ html_template = """
             <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a></li>
             <li><a id="nav-report" href="#" onclick="showSection('report')">Docs</a></li>
             <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
+            <li>
+              <a href="#" onclick="logout()" title="Logout">
+                <i data-lucide="log-out"></i>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
@@ -1867,6 +1872,15 @@ html_template = """
         window.location.href = "/logout";  // redirect to login page
       }
 
+      function openAdminOrLogout() {
+          if (CURRENT_USER === "Axel") {
+            window.location.href = "/admin";
+          } else {
+            logout();
+          }
+        }
+
+
       function openChat() {
         const chat = document.getElementById("chat-window");
         chat.classList.remove("chat-hidden");
@@ -2377,6 +2391,39 @@ def survey_results():
 def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
+
+@app.route("/metrics")
+def metrics():
+    if session.get("user") != "Axel":
+        abort(403)
+    data = Metric.query.order_by(Metric.timestamp.desc()).all()
+    return jsonify([{"metric": m.metric_name, "value": m.value, "time": m.timestamp.isoformat()} for m in data])
+
+
+@app.route("/admin")
+def admin_dashboard():
+    if session.get("user") != "Axel":
+        abort(403)  # Forbidden
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Admin Dashboard</h2>
+      <div class="home-feature-grid">
+        <a href="{{ url_for('survey_results') }}" class="feature-card" style="text-decoration:none;">
+          <div class="media"><i data-lucide="clipboard-list"></i></div>
+          <div class="body"><h4>Survey Results</h4><p>View all vessel surveys.</p></div>
+        </a>
+        <a href="{{ url_for('chat') }}" class="feature-card" style="text-decoration:none;">
+          <div class="media"><i data-lucide="message-square"></i></div>
+          <div class="body"><h4>Chat Log</h4><p>See all chat messages.</p></div>
+        </a>
+        <a href="{{ url_for('metrics') }}" class="feature-card" style="text-decoration:none;">
+          <div class="media"><i data-lucide="bar-chart-2"></i></div>
+          <div class="body"><h4>Metrics</h4><p>Track technical KPIs and logs.</p></div>
+        </a>
+      </div>
+    </div>
+    """)
+
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
