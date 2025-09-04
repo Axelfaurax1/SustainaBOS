@@ -792,19 +792,19 @@ html_template = """
 
       /* Chat window basic design */
       #chat-window {
-        position: fixed;
+        position: fixed; /* detach from parents */
         bottom: 100px;   /* sits above FAB */
         right: 20px;
         width: 300px;
         height: 250px;
         background: #fff;
         border: 1px solid var(--border);
-        border-radius: 12px;
+        border-radius: 12px; /* restore round corners normally*/
         box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         display: flex;
         flex-direction: column;
         /* overflow: hidden; */ to remove for moment as it's compromising input bar
-        z-index: 20000;
+        z-index: 99999; */ on top of everything
         transition: transform .2s ease, opacity .2s ease;
       }
 
@@ -1171,7 +1171,7 @@ html_template = """
             <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a></li>
             <li><a id="nav-report" href="#" onclick="showSection('report')">Docs</a></li>
             <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
-            <li>
+            <li style="margin-left:auto;">
               <a href="#" onclick="logout()" title="Logout">
                 <i data-lucide="log-out"></i>
               </a>
@@ -1873,7 +1873,7 @@ html_template = """
       }
 
       function openAdminOrLogout() {
-          if (CURRENT_USER === "Axel") {
+          if ("{{ session['user'] if 'user' in session else '' }}" === "Axel") {
             window.location.href = "/admin";
           } else {
             logout();
@@ -2402,6 +2402,7 @@ def metrics():
 
 @app.route("/admin")
 def admin_dashboard():
+    print(session.get("user"))
     if session.get("user") != "Axel":
         abort(403)  # Forbidden
     return render_template_string("""
