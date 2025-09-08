@@ -81,7 +81,7 @@ file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=455, usecols="B:J")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=466, usecols="B:J")
 
 # Load the summary sheet
 summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=16, usecols="A:F")
@@ -111,8 +111,8 @@ kpi_co2 = round(kpi_co2_raw, 0)                      # zero decimal for tonnes
 kpis = [
     {"title": "Initiatives", "value": kpi_devices,    "suffix": "",
         "back": ["8 initiatives certified", "7 initiatives on POC"]},
-    {"title": "2025 Gain",        "value": kpi_gain, "suffix": "%",
-        "back": ["Goal for 2026 :", "20% power savings"]},
+    {"title": "2025 Fuel Gain",        "value": kpi_gain, "suffix": "%",
+        "back": ["Scope 1 Only. Goal 2026:", "20% Fuel savings"]},
     {"title": "CO₂ Savings",       "value": kpi_co2,        "suffix": " t",
         "back": ["Expected savings", "based on fuel savings"]},
 ]
@@ -1288,12 +1288,14 @@ html_template = """
               <li><i data-lucide="check-circle-2"></i><span>Consolidate cost/CO₂-eq savings and progress.</span></li>
               <li><i data-lucide="check-circle-2"></i><span>Gather the Apps used by Britoil to power their usage.</span></li>
               <li><i data-lucide="check-circle-2"></i><span>Benchmark vessels and identify opportunities with KPI's.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Create a digital Library for sustainability documents.</span></li>
+              <li><i data-lucide="check-circle-2"></i><span>Interact within the team and vessels for updated data.</span></li>
               <!-- <li><i data-lucide="check-circle-2"></i><span>Dive deeper with Analytics (see section).</span></li> -->
             </ul>
             <div class="chips">
              <span class="chip">Fleet view</span>
-             <span class="chip">Savings tracker</span>
-             <span class="chip">Device adoption</span>
+             <span class="chip">Systems Tracker</span>
+             <span class="chip">Vessel KPI</span>
             </div>
           </div>
           <div>
@@ -1461,8 +1463,8 @@ html_template = """
                     elif 'Spinergie Fleet' in device %}bar-chart-3{% 
                     elif 'Nautilus Log' in device %}bar-chart-3{% 
                     elif 'RE Conversion' in device %}file-text{% 
-                    elif 'SeaQuest Endura' in device %}wind{% 
-                    elif 'Hempaguard' in device %}scale{% 
+                    elif 'Silicon Paint' in device %}wind{% 
+                    elif 'Shore Generator' in device %}scale{% 
                     elif 'IOW Separator' in device %}leaf{% 
                     else %}settings{% endif %}"></i>
                   <div class="initiative-sub">Click to view in which vessels the system is installed or in-process </div>
@@ -1470,7 +1472,7 @@ html_template = """
                  {% endif %}
                {% endfor %}
             </div>
-            <button class="carousel-nav carousel-next" id="iniNext" aria-label="Next">›</button>
+            <button class="carousel-nav carousel-next" id="iniNext" aria-label="Next"></button>
           </div>
 
           <h3>Summary Track Sheet</h3>
@@ -1795,6 +1797,7 @@ html_template = """
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EYadKUz1ndFGjab-1unbFBkB0diXBP36hvg2i0Bw240Ysg?e=UkaSer" target="_blank">🔗 MGPS Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/ERMqIzIiewBClWQiLKocjN8BdIuo2Ks6AVInt9oKMa-LZQ?e=dgdPCi" target="_blank">🔗 EFMS Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ea132zQliBVAu4Gc_H4ZSZcBzIcYKu7CWsLZGsyiaSCX5A?e=mqJhyx" target="_blank">🔗 IWTM Filters Study</a></li>
+               <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/Eb2xPkJWe0BEiWT-VtiWmD4BUFXw7fW2ZsQkvypmJ89u5Q?e=4rPoGg" target="_blank">🔗 CJC Unit Study</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:b:/g/personal/axel_faurax_britoil_com_sg/EQcq4o4Y5LpJgolosjOT5ncBuy-rpGnWClYvaNn6pmziAw?e=Kr5XTK" target="_blank">🔗 Fleet Management System Pre-Study</a></li>               
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/Ee3lqUA0Cl5ApvCfcGaexv0BIv881MnJPRGPFBxgYCMPjw?e=oFyS5x" target="_blank">🔗 New Initiatives Presentation – Dubai 2024</a></li>
                <li style="margin-bottom: 12px;"><a href="https://britoilos-my.sharepoint.com/:p:/g/personal/axel_faurax_britoil_com_sg/EXAFSkLNyppFtbHGKCwqRyABAuUzok_kEdlRdhw-UxKoLQ?e=gyBv4R" target="_blank">🔗 New Initiatives 2025</a></li>
