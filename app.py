@@ -2206,7 +2206,7 @@ def login():
         <meta charset="utf-8">
         <title>Login- SustainaBOS</title>
         <style>
-            body {{
+            body {
                 font-family: 'Segoe UI', sans-serif;
                 background: url('/static/imagelogin.JPG') no-repeat center center fixed;
                 background-size: cover;
@@ -2215,8 +2215,8 @@ def login():
                 align-items: center;
                 height: 100vh;
                 margin: 0;
-            }}
-            .login-container {{
+            }
+            .login-container {
                 background: rgba(255, 255, 255, 0.9);
                 backdrop-filter: blur(6px);
                 padding: 40px;
@@ -2224,17 +2224,17 @@ def login():
                 box-shadow: 0 8px 24px rgba(0,0,0,0.15);
                 text-align: center;
                 width: 340px;
-            }}
-            .login-container img {{
+            }
+            .login-container img {
             width: 60px;
             margin-bottom: 15px;
-            }}
+            }
 
-            .login-container h2 {{
+            .login-container h2 {
                 margin-bottom: 20px;
                 color: var(--brand-purple, #6a1b9a);
-            }}
-            .login-container input {{
+            }
+            .login-container input {
                 width: 100%;
                 padding: 12px;
                 margin: 8px 0;
@@ -2242,8 +2242,8 @@ def login():
                 border-radius: 8px;
                 font-size: 14px;
                 box-sizing: border-box; /* keep consistent sizing */
-            }}
-            .login-container button {{
+            }
+            .login-container button {
                 width: 100%;
                 padding: 12px;
                 margin-top: 12px;  /* add spacing below password input */
@@ -2257,12 +2257,12 @@ def login():
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                 transition: transform 0.2s;
                 box-sizing: border-box; /* match input sizing */
-            }}
-            .login-container button:hover {{
+            }
+            .login-container button:hover {
                 transform: translateY(-2px);
                 background: var(--brand-green, #2e7d32);
-            }}
-            .survey-button {{
+            }
+            .survey-button {
                 display: block;
                 width: 100%;
                 padding: 12px;
@@ -2277,15 +2277,15 @@ def login():
                 transition: background 0.2s;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                 box-sizing: border-box; /* match input sizing */
-            }}
-            .survey-button:hover {{
+            }
+            .survey-button:hover {
                 transform: translateY(-2px);
                 background: var(--brand-green, #2e7d32);
-            }}
-            .error {{
+            }
+            .error {
                 color: red;
                 margin-bottom: 15px;
-            }}
+            }
         </style>
     </head>
     <body>
