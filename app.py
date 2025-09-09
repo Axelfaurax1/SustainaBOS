@@ -155,7 +155,7 @@ kpis = [
 # --- KPIs for KPI Section (Summary!J7, J8, J4) ---
 kpi_tfc_raw       = _num(6, 9)   # J7
 kpi_vessels_raw   = _num(7, 9)   # J8
-kpi_update_raw    = _num(3, 9)*100   # J4
+kpi_update_raw    = _num(3, 9)*90   # J4
 
 # Clean
 kpi_tfc = int(round(kpi_tfc_raw))
@@ -722,6 +722,44 @@ html_template = """
       vertical-align:middle;
       stroke-width:2.2;
     }
+
+    /* Contact new build section */
+
+    .contact-wrapper {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap; /* stack on mobile */
+    }
+
+    .contact-text {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    .contact-photo {
+      flex: 1;
+      max-width: 300px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      padding: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .contact-photo img {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    /* 🔥 Hover effect */
+    .contact-photo:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+    }
+
 
     /* ===== Home redesign ===== */
     .home-feature-grid{
@@ -1920,34 +1958,43 @@ html_template = """
 
       <div id="contact" class="section content hidden">
 
-          <div id="instruction-box-nul" style="display: none; position: absolute; top: 250px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
-              <strong>HELLO ! </strong><br><br>
-              <b>Feel free to contact me ^^</b>
+        <div id="instruction-box-nul" style="display: none; position: absolute; top: 250px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
+            <strong>HELLO ! </strong><br><br>
+            <b>Feel free to contact me ^^</b>
+        </div>
+
+        <h2>Contact</h2>
+
+        <div class="contact-wrapper">
+          <!-- LEFT COLUMN -->
+          <div class="contact-text">
+            <h3>Axel Faurax - Sustainability Engineer</h3>
+            <p>Axel is our sustainability and performance engineer. He's driving the green and innovative solutions across the fleet. Reporting directly to Mohit Sabharwal and Florent Kirchoff.</p>
+            <p>A highly adaptable and dynamic professional, Axel offers a multi-disciplinary and versatile approach when leading projects. His strong relational and altruistic qualities are complemented by a keenness to learn and a proven competitive spirit developed through athletics. His sensitivity to both ecological and human concerns are also something to highlight.</p>
+            <br>
+            <h3>Contact infos</h3>
+            <p><b>Name:</b> Axel Faurax</p>
+            <p><b>Phone (SG):</b> +65 81298204 </p>
+            <p><b>Phone (FR):</b> +33 771770134 </p>
+            <p><b>Email:</b> axel.faurax@britoil.com.sg </p>
+            <br>
+            <h3>Office</h3>
+            <p><b>Address:</b> 100G Pasir Panjang Rd</p>
+            <p><b>Postal Code:</b> 118523</p>
+            <br><br>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+              <img src="{{ url_for('static', filename='QRCODE.jpg') }}" alt="Track" width="450">
+            </div>
           </div>
 
-          <h2>Contact</h2>
-          <h3>Axel Faurax - Sustainability Engineer</h3>
-          <p>Axel is our sustainability and performance engineer. He's driving the green and innovative solutions accross the fleet. Reporting directly to Mohit Sabharwal and Florent Kirchoff.</p>
-          <p>A highly adaptable and dynamic professional, Axel offers a multi-disciplinary and versatile approach when leading projects. He's strong relational and altruistic qualities are complemented by a keenness to learn and a proven competitive spirit developed through athletics. His sensitivity to both ecological and human concerns are also something to highlight.</p>
-          <br>
-          <h3>Contact infos</h3>
-          <p>Name: Axel Faurax</p>
-          <p>Phone (SG): +65 81298204 </p>
-          <p>Phone (FR): +33 771770134 </p>
-          <p>Email: axel.faurax@britoil.com.sg </p>
-          <br>
-          <h3>Office</h3>
-          <p>Adress: 100G Pasir Panjang Rd</p>
-          <p>Postal Code: 118523</p>
-          <br> <br>
-          <div style="display: flex; justify-content: center; gap: 20px;">
-             <img src="{{ url_for('static', filename='QRCODE.jpg') }}" alt="Track" width="450">
+          <!-- RIGHT COLUMN (PHOTO BOX) -->
+          <div class="contact-photo">
+            <img src="{{ url_for('static', filename='mepic.png') }}" alt="Axel Faurax">
           </div>
-       
+        </div>
+
       </div>
 
-
-    </div>
     <footer style="background-color: #333; color: #fff; padding: 20px 0; margin-top: 40px;">
        <div class="container" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
          <p style="margin: 5px 0;">&copy; 2025 Britoil Offshore Services. All rights reserved.</p>
