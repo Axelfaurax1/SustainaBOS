@@ -151,6 +151,24 @@ kpis = [
         "back": ["Expected savings", "based on fuel savings"]},
 ]
 
+# --- KPIs for KPI's section ---
+# --- KPIs for KPI Section (Summary!J7, J8, J4) ---
+kpi_tfc_raw       = _num(6, 9)   # J7
+kpi_vessels_raw   = _num(7, 9)   # J8
+kpi_update_raw    = _num(3, 9)   # J4
+
+# Clean
+kpi_tfc = round(kpi_tfc_raw, 0)
+kpi_vessels = int(round(kpi_vessels_raw))
+kpi_update = kpi_update_raw   # probably a string/date? keep as is
+
+# Prepare for template
+kpis_section = [
+    {"title": "Last 12 months TFC", "value": kpi_tfc, "suffix": ""},
+    {"title": "Number of Vessels", "value": kpi_vessels, "suffix": ""},
+    {"title": "Updated Info", "value": kpi_update, "suffix": ""},
+]
+
 def get_vessel_summary(vessel_name):
 
     #print(list_df.iloc[:, 1])
@@ -825,6 +843,41 @@ html_template = """
        font-size: 0.95rem;
        color: var(--muted);
     }
+
+    .kpi-grid {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .kpi-simple-card {
+      width: 230px;
+      height: 130px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .kpi-simple-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--brand-purple);
+    }
+
+    .kpi-simple-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
 
       /* Chat window basic design */
       #chat-window {
@@ -1724,6 +1777,16 @@ html_template = """
       </div>
 
       <div id="analytics" class="section content hidden">
+
+          <div class="kpi-grid">
+            {% for k in kpis_section %}
+              <div class="kpi-simple-card">
+                <h3>{{ k.title }}</h3>
+                <div class="kpi-simple-value">{{ k.value }}{{ k.suffix }}</div>
+              </div>
+            {% endfor %}
+          </div>
+
           <h2>Analytics</h2>
 
           <p> You can interact with BI charts after sign in. Refresh if any issues </p>
@@ -1861,6 +1924,11 @@ html_template = """
           </div>
 
           <h2>Contact</h2>
+          <h3>Axel Faurax - Sustainability Engineer</h3>
+          <p>Axel is our sustainability and performance engineer. He's driving the green and innovative solutions accross the fleet. Reporting directly to Mohit Sabharwal and Florent Kirchoff.</p>
+          <p>A highly adaptable and dynamic professional, Axel offers a multi-disciplinary and versatile approach when leading projects. He's strong relational and altruistic qualities are complemented by a keenness to learn and a proven competitive spirit developed through athletics. His sensitivity to both ecological and human concerns are also something to highlight.</p>
+          <br>
+          <h3>Contact infos</h3>
           <p>Name: Axel Faurax</p>
           <p>Phone (SG): +65 81298204 </p>
           <p>Phone (FR): +33 771770134 </p>
