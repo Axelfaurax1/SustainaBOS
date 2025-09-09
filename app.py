@@ -5,7 +5,10 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from flask_sqlalchemy import SQLAlchemy
+
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 #from datetime import timedelta
 # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)  # or days=1
@@ -52,6 +55,11 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
+class User2(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
+
 
 # To ignore warnings of openxyl, excel sheet weird format
 import warnings
@@ -74,6 +82,32 @@ users = {
     "Siva": "BOSsira*",
     "Alessandro":"BOSalba*",
 }
+
+def seed_users():
+    # hardcoded users (your current dictionary)
+    default_users = {
+        "Axel": "BOSaxfa*",
+        "admin": "secret123",
+        "Mohit": "BOSmosa*",
+        "Florent": "BOSflki*",
+        "Julian": "BOSjuoh*",
+        "Richard": "BOSrihi*",
+        "Ernest": "BOSerlo*",
+        "Sundar": "BOSsucc*",
+        "Ser Boon": "BOSseta*",
+        "Siva": "BOSsira*",
+        "Alessandro": "BOSalba*",
+    }
+
+    for username, password in default_users.items():
+        existing_user = User2.query.filter_by(username=username).first()
+        if not existing_user:
+            hashed_pw = generate_password_hash(password)
+            new_user = User2(username=username, password_hash=hashed_pw)
+            db.session.add(new_user)
+
+    db.session.commit()
+
 
 
 # Load the Excel file with specified column names starting from row 8 and column B
@@ -2099,28 +2133,73 @@ def login():
     if 'user' in session:
         return redirect(url_for('index'))
 
+    step = "login"   # default form
+    error = None
+
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
+        # Case A: Login attempt
+        if 'username' in request.form and 'password' in request.form:
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
 
-        if username in users and users[username] == password:
-            session['user'] = username
+            user = User2.query.filter_by(username=username).first()
+            if user and check_password_hash(user.password_hash, password):
+                # check if it's still default password
+                default_users = {
+                    "Axel": "BOSaxfa*",
+                    "admin": "secret123",
+                    "Mohit": "BOSmosa*",
+                    "Florent": "BOSflki*",
+                    "Julian": "BOSjuoh*",
+                    "Richard": "BOSrihi*",
+                    "Ernest": "BOSerlo*",
+                    "Sundar": "BOSsucc*",
+                    "Ser Boon": "BOSseta*",
+                    "Siva": "BOSsira*",
+                    "Alessandro": "BOSalba*",
+                }
 
-            #Short line section for metrics of login
-            print(username)
-            log = Metric(metric_name=username, value=0)
-            
-            db.session.add(log)
-            db.session.commit()
+                if default_users.get(username) == password:
+                    # switch to change-password step
+                    session['pending_user'] = username
+                    step = "change_password"
+                else:
+                    # normal login
+                    session['user'] = username
+                    log = Metric(metric_name=username, value=0)
+                    db.session.add(log)
+                    db.session.commit()
+                    return redirect(url_for('index'))
+            else:
+                error = "Invalid username or password"
 
-            # session.permanent = True. #If add, every 31 days. If remove, when browser close
-            return redirect(url_for('index'))
-        else:
-            error = "Invalid username or password"
-    else:
-        error = None
+        # Case B: Change password submission
+        elif 'new_password' in request.form and 'confirm_password' in request.form:
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+            username = session.get('pending_user')
 
-    login_page = f"""
+            if not username:
+                return redirect(url_for('login'))
+
+            if new_password != confirm_password:
+                error = "Passwords do not match."
+                step = "change_password"
+            else:
+                user = User2.query.filter_by(username=username).first()
+                if user:
+                    user.password_hash = generate_password_hash(new_password)
+                    db.session.commit()
+                    session.pop('pending_user')
+                    session['user'] = username
+
+                    log = Metric(metric_name=f"{username}_password_changed", value=1)
+                    db.session.add(log)
+                    db.session.commit()
+                    return redirect(url_for('index'))
+
+    # --- HTML: same page handles both login + change password ---
+    login_page = """
     <!doctype html>
     <html lang="en">
     <head>
@@ -2212,13 +2291,22 @@ def login():
     <body>
         <div class="login-container">
             <img src="/static/green_leaf.png" alt="Logo">
-            <h2>SustainaBOS Login</h2>
-            {f'<p class="error">{error}</p>' if error else ''}
+            <h2>{% if step == 'login' %}SustainaBOS Login{% else %}Set Your New Password{% endif %}</h2>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
             <form method="post">
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Login</button>
+                {% if step == 'login' %}
+                    <input type="text" name="username" placeholder="Username" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                {% else %}
+                    <input type="password" name="new_password" placeholder="New Password" required>
+                    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                    <button type="submit">Change Password</button>
+                {% endif %}
             </form>
+
             <!-- Vessel survey button -->
             <h2>For Crew</h2>
             <a href="/survey" class="survey-button">Vessel Survey</a>
@@ -2483,12 +2571,21 @@ def notify_new_device():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-
-#@app.route("/init-db")
-#def init_db():
-    #with app.app_context():
-        #db.create_all()
+@app.route("/init-db")
+def init_db():
+    with app.app_context():
+        db.create_all()  #for creating tabs not created yet
+        seed_users()      # seeds your initial users if not present
     #return "Database initialized!"
+    return "users sent"
+
+# If data cna be lost , to destroy table :
+# (So can modify tables code (class) and re create tabs) Here is code
+# with app.app_context():
+    #db.drop_all()
+    #db.create_all()
+    #seed_users() #If still password case
+
 
 if __name__ == '__main__':
     app.run(debug=True)
