@@ -169,6 +169,8 @@ kpis_section = [
     {"title": "Updated Info", "value": kpi_update, "suffix": "%"},
 ]
 
+print(kpis_section)
+
 def get_vessel_summary(vessel_name):
 
     #print(list_df.iloc[:, 1])
