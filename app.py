@@ -2128,6 +2128,7 @@ def index():
         kpis=kpis,   # ← add this line
     )
 
+#region login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'user' in session:
@@ -2490,33 +2491,161 @@ def metrics():
     if session.get("user") != "Axel":
         abort(403)
     data = Metric.query.order_by(Metric.timestamp.desc()).all()
-    return jsonify([{"metric": m.metric_name, "value": m.value, "time": m.timestamp.isoformat()} for m in data])
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Metrics</h2>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width:100%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in data %}
+          <tr>
+            <td>{{ m.metric_name }}</td>
+            <td>{{ m.value }}</td>
+            <td>{{ m.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """, data=data)
 
+#region admin
 
 @app.route("/admin")
 def admin_dashboard():
-    print(session.get("user"))
     if session.get("user") != "Axel":
         abort(403)  # Forbidden
+
+    return render_template_string("""
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Admin Dashboard - SustainaBOS</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: #f5f5f5;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 1000px;
+                margin: 40px auto;
+                padding: 20px;
+            }
+            h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                color: #333;
+            }
+            .card-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            .feature-card {
+                background: white;
+                padding: 20px;
+                border-radius: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                text-align: center;
+                transition: transform 0.2s, box-shadow 0.2s;
+                text-decoration: none;
+                color: inherit;
+            }
+            .feature-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+            .feature-card .media {
+                font-size: 32px;
+                margin-bottom: 12px;
+                color: #6a1b9a;
+            }
+            .feature-card h4 {
+                margin: 10px 0 8px;
+                color: #222;
+            }
+            .feature-card p {
+                font-size: 14px;
+                color: #555;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Admin Dashboard</h2>
+            <div class="card-grid">
+                <a href="{{ url_for('survey_results') }}" class="feature-card">
+                    <div class="media">📋</div>
+                    <h4>Survey Results</h4>
+                    <p>View all vessel surveys.</p>
+                </a>
+                <a href="{{ url_for('chat') }}" class="feature-card">
+                    <div class="media">💬</div>
+                    <h4>Chat Log</h4>
+                    <p>See all chat messages.</p>
+                </a>
+                <a href="{{ url_for('metrics') }}" class="feature-card">
+                    <div class="media">📊</div>
+                    <h4>Metrics</h4>
+                    <p>Track technical KPIs and logs.</p>
+                </a>
+                <a href="{{ url_for('admin_add_user') }}" class="feature-card">
+                    <div class="media">➕</div>
+                    <h4>Create User</h4>
+                    <p>Add new application users.</p>
+                </a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
+
+
+@app.route("/admin/add_user", methods=["GET", "POST"])
+def admin_add_user():
+    if session.get("user") != "Axel":
+        abort(403)
+
+    message = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        if username:
+            default_password = f"BOS{username.lower()}*"
+            existing = User2.query.filter_by(username=username).first()
+            if existing:
+                message = f"User {username} already exists!"
+            else:
+                new_user = User2(
+                    username=username,
+                    password_hash=generate_password_hash(default_password)
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                message = f"User {username} created with default password {default_password}"
+
     return render_template_string("""
     <div class="container section content">
-      <h2>Admin Dashboard</h2>
-      <div class="home-feature-grid">
-        <a href="{{ url_for('survey_results') }}" class="feature-card" style="text-decoration:none;">
-          <div class="media"><i data-lucide="clipboard-list"></i></div>
-          <div class="body"><h4>Survey Results</h4><p>View all vessel surveys.</p></div>
-        </a>
-        <a href="{{ url_for('chat') }}" class="feature-card" style="text-decoration:none;">
-          <div class="media"><i data-lucide="message-square"></i></div>
-          <div class="body"><h4>Chat Log</h4><p>See all chat messages.</p></div>
-        </a>
-        <a href="{{ url_for('metrics') }}" class="feature-card" style="text-decoration:none;">
-          <div class="media"><i data-lucide="bar-chart-2"></i></div>
-          <div class="body"><h4>Metrics</h4><p>Track technical KPIs and logs.</p></div>
-        </a>
-      </div>
+      <h2>Add New User</h2>
+      {% if message %}
+        <p><strong>{{ message }}</strong></p>
+      {% endif %}
+      <form method="post">
+        <input type="text" name="username" placeholder="Enter username" required>
+        <button type="submit">Create User</button>
+      </form>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
     </div>
-    """)
+    """, message=message)
 
 
 @app.route("/chat", methods=["GET", "POST"])
@@ -2571,6 +2700,7 @@ def notify_new_device():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+#region init 
 #@app.route("/init-db")
 #def init_db():
     #with app.app_context():
