@@ -2197,6 +2197,7 @@ def index():
         listvessel_df=listvessel_df,
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
+        kpis_section=kpis_section, #to not forget
     )
 
 #region login
