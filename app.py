@@ -158,9 +158,9 @@ kpi_vessels_raw   = _num(7, 9)   # J8
 kpi_update_raw    = _num(3, 9)*100   # J4
 
 # Clean
-kpi_tfc = round(kpi_tfc_raw, 0)
+kpi_tfc = int(round(kpi_tfc_raw))
 kpi_vessels = int(round(kpi_vessels_raw))
-kpi_update = kpi_update_raw   # probably a string/date? keep as is
+kpi_update = int(round(kpi_update_raw))   # probably a string/date? keep as is. If not check
 
 # Prepare for template
 kpis_section = [
@@ -169,7 +169,7 @@ kpis_section = [
     {"title": "Updated Info", "value": kpi_update, "suffix": "%"},
 ]
 
-print(kpis_section)
+#print(kpis_section)
 
 def get_vessel_summary(vessel_name):
 
@@ -1782,7 +1782,6 @@ html_template = """
 
           <div class="kpi-grid">
             {% for k in kpis_section %}
-              print(k)
               <div class="kpi-simple-card">
                 <h3>{{ k.title }}</h3>
                 <div class="kpi-simple-value">{{ k.value }}{{ k.suffix }}</div>
