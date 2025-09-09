@@ -155,7 +155,7 @@ kpis = [
 # --- KPIs for KPI Section (Summary!J7, J8, J4) ---
 kpi_tfc_raw       = _num(6, 9)   # J7
 kpi_vessels_raw   = _num(7, 9)   # J8
-kpi_update_raw    = _num(3, 9)   # J4
+kpi_update_raw    = _num(3, 9)*100   # J4
 
 # Clean
 kpi_tfc = round(kpi_tfc_raw, 0)
@@ -164,9 +164,9 @@ kpi_update = kpi_update_raw   # probably a string/date? keep as is
 
 # Prepare for template
 kpis_section = [
-    {"title": "Last 12 months TFC", "value": kpi_tfc, "suffix": ""},
+    {"title": "Last 12 months TFC", "value": kpi_tfc, "suffix": "t"},
     {"title": "Number of Vessels", "value": kpi_vessels, "suffix": ""},
-    {"title": "Updated Info", "value": kpi_update, "suffix": ""},
+    {"title": "Updated Info", "value": kpi_update, "suffix": "%"},
 ]
 
 def get_vessel_summary(vessel_name):
@@ -1780,6 +1780,7 @@ html_template = """
 
           <div class="kpi-grid">
             {% for k in kpis_section %}
+              print(k)
               <div class="kpi-simple-card">
                 <h3>{{ k.title }}</h3>
                 <div class="kpi-simple-value">{{ k.value }}{{ k.suffix }}</div>
