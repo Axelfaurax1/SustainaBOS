@@ -2314,7 +2314,7 @@ def login():
     </body>
     </html>
     """
-    return login_page
+    return render_template_string(login_page, step=step, error=error)
 
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
@@ -2571,13 +2571,13 @@ def notify_new_device():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route("/init-db")
-def init_db():
-    with app.app_context():
-        db.create_all()  #for creating tabs not created yet
-        seed_users()      # seeds your initial users if not present
+#@app.route("/init-db")
+#def init_db():
+    #with app.app_context():
+        #db.create_all()  #for creating tabs not created yet
+        #seed_users()      # seeds your initial users if not present
     #return "Database initialized!"
-    return "users sent"
+    #return "users sent"
 
 # If data cna be lost , to destroy table :
 # (So can modify tables code (class) and re create tabs) Here is code
