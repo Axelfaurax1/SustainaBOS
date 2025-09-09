@@ -164,9 +164,9 @@ kpi_update = int(round(kpi_update_raw))   # probably a string/date? keep as is. 
 
 # Prepare for template
 kpis_section = [
-    {"title": "Last 12 months TFC", "value": kpi_tfc, "suffix": "t"},
-    {"title": "Number of Vessels", "value": kpi_vessels, "suffix": ""},
-    {"title": "Updated Info", "value": kpi_update, "suffix": "%"},
+    {"title": "Last 12 months TFC", "value": kpi_tfc,     "suffix": " t"},
+    {"title": "Number of Vessels", "value": kpi_vessels,     "suffix": ""},
+    {"title": "Updated Info", "value": kpi_update,     "suffix": "%"},
 ]
 
 #print(kpis_section)
@@ -913,6 +913,7 @@ html_template = """
     }
 
     .kpi-simple-value {
+      margin: 5px 0;
       font-size: 1.6rem;
       font-weight: 700;
       color: var(--brand-green);
@@ -1958,10 +1959,10 @@ html_template = """
 
       <div id="contact" class="section content hidden">
 
-        <div id="instruction-box-nul" style="display: none; position: absolute; top: 250px; left: 70%; transform: translateX(-70%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
+        <!-- <div id="instruction-box-nul" style="display: none; position: absolute; top: 250px; left: 30%; transform: translateX(-30%); background-color: #eef; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 1s ease; opacity: 0;">
             <strong>HELLO ! </strong><br><br>
             <b>Feel free to contact me ^^</b>
-        </div>
+        </div> -->
 
         <h2>Contact</h2>
 
@@ -2604,6 +2605,34 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
+@app.route("/roles")
+def roles():
+    if session.get("user") != "Axel":
+        abort(403)
+    carnet = User2.query.order_by(User2.username.desc()).all()
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Users and roles</h2>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width:100%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th>Users</th>
+            <th>Roles</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in carnet %}
+          <tr>
+            <td>{{ m.username }}</td>
+            <td>{{ "Undefined" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """, carnet=carnet)
+
 @app.route("/metrics")
 def metrics():
     if session.get("user") != "Axel":
@@ -2722,6 +2751,11 @@ def admin_dashboard():
                     <h4>Create User</h4>
                     <p>Add new application users.</p>
                 </a>
+                <a href="{{ url_for('roles') }}" class="feature-card">
+                    <div class="media">📄</div>
+                    <h4>User Roles</h4>
+                    <p>See all users and roles.</p>
+                </a>                  
             </div>
         </div>
     </body>
