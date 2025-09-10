@@ -330,6 +330,25 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('static/top_vessels_chart.png')
 
+# --- Fuel Consumption Data (Monthly) ---
+fuel_data = {
+    "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
+    "TFC":      [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
+    "DEFIANCE": [194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
+    "PRINCIPLE":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
+    "PRIME":    [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
+
+goal_data = {
+    "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
+    "AVERAGE": [123.1525, 126.1825, 175.94, 142.63, 157.8375, 165.18, 159.2325, 127.54],
+    "GOAL":    [104.679625, 100.946, 123.158, 114.104, 126.27, 132.144, 127.386, 114.786]
+}
+
+# Latest values (last element of each list)
+fuel_latest = fuel_data["TFC"][-1]   # last TFC value
+avg_latest = goal_data["AVERAGE"][-1]
+goal_latest = goal_data["GOAL"][-1]
+
 #region HTML section
 # HTML template for the website with improved design and images
 html_template = """
@@ -760,6 +779,47 @@ html_template = """
       box-shadow: 0 10px 24px rgba(0,0,0,0.15);
     }
 
+    /* For charts */
+
+    .chart-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 40px auto;
+      flex-wrap: wrap;
+    }
+
+    .chart-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      padding: 20px;
+      flex: 1;
+      min-width: 400px;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 15px;
+      font-size: 1.2rem;
+      color: var(--brand-purple);
+      text-align: center;
+    }
+
+    .chart-counter {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--brand-green);
+      margin-bottom: 10px;
+    }
+
+    .chart-subtitle {
+      font-size: 1rem;
+      color: var(--brand-purple);
+      margin-bottom: 15px;
+    }
+
 
     /* ===== Home redesign ===== */
     .home-feature-grid{
@@ -913,8 +973,8 @@ html_template = """
     }
 
     .kpi-simple-value {
-      margin: 5px 0;
-      font-size: 1.6rem;
+      margin: 10px 0;
+      font-size: 1.5rem;
       font-weight: 700;
       color: var(--brand-green);
     }
@@ -1828,6 +1888,21 @@ html_template = """
             {% endfor %}
           </div>
 
+          <div class="chart-row">
+            <!-- Chart 1: Fuel -->
+            <div class="chart-card">
+              <h3>Monthly Fuel Consumption</h3>
+              <canvas id="fuelChart"></canvas>
+            </div>
+
+            <!-- Chart 2: Average vs Goal -->
+            <div class="chart-card">
+              <h3>Average vs Goal</h3>
+              <canvas id="goalChart"></canvas>
+            </div>
+          </div>
+
+
           <h2>Analytics</h2>
 
           <p> You can interact with BI charts after sign in. Refresh if any issues </p>
@@ -2221,6 +2296,109 @@ html_template = """
 
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 🔥 Counter animation function
+      function animateCounter(id, target) {
+        const el = document.getElementById(id);
+        let count = 0;
+        const step = target / 60; // ~1s animation
+
+        function update() {
+          count += step;
+          if (count < target) {
+            el.textContent = Math.floor(count);
+            requestAnimationFrame(update);
+          } else {
+            el.textContent = target.toFixed(2); // keep decimals if needed
+          }
+        }
+        update();
+      }
+
+      // Run counters
+      animateCounter("fuelCounter", {{ fuel_latest }});
+      animateCounter("avgCounter", {{ avg_latest }});
+      animateCounter("goalCounter", {{ goal_latest }});
+
+      // --- Chart 1: Fuel Consumption ---
+      new Chart(document.getElementById("fuelChart").getContext("2d"), {
+        type: "line",
+        data: {
+          labels: {{ fuel_data.months|tojson }},
+          datasets: [
+            {
+              label: "TFC",
+              data: {{ fuel_data.TFC|tojson }},
+              borderColor: "#2e7d32",
+              backgroundColor: "rgba(46,125,50,0.2)",
+              fill: true,
+              tension: 0.4,
+              borderWidth: 2
+            },
+            {
+              label: "DEFIANCE",
+              data: {{ fuel_data.DEFIANCE|tojson }},
+              borderColor: "#6a1b9a",
+              fill: false,
+              tension: 0.4,
+              borderWidth: 2
+            },
+            {
+              label: "PRINCIPLE",
+              data: {{ fuel_data.PRINCIPLE|tojson }},
+              borderColor: "#1565c0",
+              fill: false,
+              tension: 0.4,
+              borderWidth: 2
+            },
+            {
+              label: "PRIME",
+              data: {{ fuel_data.PRIME|tojson }},
+              borderColor: "#ef6c00",
+              fill: false,
+              tension: 0.4,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: { responsive: true }
+      });
+
+      // --- Chart 2: Average vs Goal ---
+      new Chart(document.getElementById("goalChart").getContext("2d"), {
+        type: "line",
+        data: {
+          labels: {{ goal_data.months|tojson }},
+          datasets: [
+            {
+              label: "Average",
+              data: {{ goal_data.AVERAGE|tojson }},
+              borderColor: "#2e7d32",
+              backgroundColor: "rgba(46,125,50,0.15)",
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            },
+            {
+              label: "Goal",
+              data: {{ goal_data.GOAL|tojson }},
+              borderColor: "#6a1b9a",
+              borderDash: [6,6],  // dashed line
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            }
+          ]
+        },
+        options: { responsive: true }
+      });
+    });
+    </script>
+
+
+
 
    </body>
 </html>
@@ -2245,6 +2423,11 @@ def index():
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
         kpis_section=kpis_section, #to not forget
+        fuel_data=fuel_data,
+        goal_data=goal_data,
+        fuel_latest=fuel_latest,
+        avg_latest=avg_latest,
+        goal_latest=goal_latest
     )
 
 #region login
