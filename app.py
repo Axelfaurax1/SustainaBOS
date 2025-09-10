@@ -802,7 +802,7 @@ html_template = """
 
     .chart-card h3 {
       margin: 0 0 15px;
-      font-size: 1.2rem;
+      font-size: 1.0rem;
       color: var(--brand-purple);
       text-align: center;
     }
@@ -973,7 +973,7 @@ html_template = """
     }
 
     .kpi-simple-value {
-      margin: 10px 0;
+      margin: 15px 0;
       font-size: 1.5rem;
       font-weight: 700;
       color: var(--brand-green);
@@ -1891,16 +1891,27 @@ html_template = """
           <div class="chart-row">
             <!-- Chart 1: Fuel -->
             <div class="chart-card">
-              <h3>Monthly Fuel Consumption</h3>
+              <div class="chart-counter" data-target="{{ fuel_latest }}" id="fuelCounter">0</div>
+              <div class="chart-subtitle">Latest TFC Value</div>
               <canvas id="fuelChart"></canvas>
             </div>
 
             <!-- Chart 2: Average vs Goal -->
             <div class="chart-card">
-              <h3>Average vs Goal</h3>
+              <div style="display:flex; justify-content:space-around;">
+                <div>
+                  <div class="chart-counter" data-target="{{ avg_latest }}" id="avgCounter">0</div>
+                  <div class="chart-subtitle">Latest Average</div>
+                </div>
+                <div>
+                  <div class="chart-counter" data-target="{{ goal_latest }}" id="goalCounter">0</div>
+                  <div class="chart-subtitle">Latest Goal</div>
+                </div>
+              </div>
               <canvas id="goalChart"></canvas>
             </div>
           </div>
+
 
 
           <h2>Analytics</h2>
@@ -2427,7 +2438,7 @@ def index():
         goal_data=goal_data,
         fuel_latest=fuel_latest,
         avg_latest=avg_latest,
-        goal_latest=goal_latest
+        goal_latest=goal_latest,
     )
 
 #region login
