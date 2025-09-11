@@ -2532,7 +2532,7 @@ html_template = """
       new Chart(document.getElementById("condChart").getContext("2d"), {
         type: "line",
         data: {
-          labels: {{ cw_data.months|tojson }},
+          labels: {{ cw_data.weeks|tojson }},
           datasets: [
             {
               label: "CONDUCTIVITY",
