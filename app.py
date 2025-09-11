@@ -2340,7 +2340,7 @@ html_template = """
           labels: {{ fuel_data.months|tojson }},
           datasets: [
             {
-              label: "Defiance",
+              label: "DEFIANCE",
               data: {{ fuel_data.DEFIANCE|tojson }},
               borderColor: "#2e7d32",
               backgroundColor: "rgba(46,125,50,0.2)",
@@ -2349,7 +2349,7 @@ html_template = """
               borderWidth: 2
             },
             {
-              label: "Principle",
+              label: "PRINCIPLE",
               data: {{ fuel_data.PRINCIPLE|tojson }},
               borderColor: "#6a1b9a",
               fill: false,
@@ -2357,7 +2357,7 @@ html_template = """
               borderWidth: 2
             },
             {
-              label: "Prime",
+              label: "PRIME",
               data: {{ fuel_data.PRIME|tojson }},
               borderColor: "#1565c0",
               fill: false,
@@ -2365,7 +2365,7 @@ html_template = """
               borderWidth: 2
             },
             {
-              label: "Prelude",
+              label: "PRELUDE",
               data: {{ fuel_data.PRELUDE|tojson }},
               borderColor: "#ef6c00",
               fill: false,
