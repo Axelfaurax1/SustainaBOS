@@ -345,7 +345,7 @@ goal_data = {
 }
 
 # Latest values (last element of each list)
-fuel_latest = fuel_data["TFC"][-1]   # last TFC value
+fuel_latest = fuel_data["DEFIANCE"][-1]   # last TFC value
 avg_latest = goal_data["AVERAGE"][-1]
 goal_latest = goal_data["GOAL"][-1]
 
