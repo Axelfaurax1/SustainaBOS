@@ -333,10 +333,10 @@ plt.savefig('static/top_vessels_chart.png')
 # --- Fuel Consumption Data (Monthly) ---
 fuel_data = {
     "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-    "DEFIANCE":      [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
+    "DEFIANCE": [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
     "PRINCIPLE": [194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
     "PRIME":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
-    "PRELUDE":    [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
+    "PRELUDE": [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
 
 goal_data = {
     "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
@@ -2979,7 +2979,7 @@ def admin_dashboard():
                     <p>Add new application users.</p>
                 </a>
                 <a href="{{ url_for('roles') }}" class="feature-card">
-                    <div class="media">🔥</div>
+                    <div class="media">📊</div>
                     <h4>User Roles</h4>
                     <p>See all users and roles.</p>
                 </a>
