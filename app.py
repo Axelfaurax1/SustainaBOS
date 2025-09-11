@@ -320,6 +320,7 @@ vessel_devices['Total Savings'] = vessel_devices['Savings/year (fuel efficiency)
 # Get the top 10 vessels with the best performance
 top_vessels = vessel_devices.groupby('Vessel Name/ ID')['Total Savings'].sum().nlargest(10).reset_index()
 
+#region charts
 # Create a bar chart for the top 10 vessels
 plt.figure(figsize=(10, 6))
 plt.bar(top_vessels['Vessel Name/ ID'], top_vessels['Total Savings'], color='blue')
@@ -348,6 +349,26 @@ goal_data = {
 fuel_latest = fuel_data["DEFIANCE"][-1]   # last DEFIANCE value
 avg_latest = goal_data["AVERAGE"][-1]
 goal_latest = goal_data["GOAL"][-1]
+
+# --- Oil lub and CW Water Data (Monthly) ---
+oil_data = {
+    "weeks": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
+    "OIL_WATER":[87.5, 54, 50.5, 55, 46, 35, 31, 28],
+    "PPM_2um":[91, 79, 56, 53, 29, 17, 16, 9],
+}
+
+cw_data = {
+    "weeks": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
+    "CONDUCTIVITY": [94, 84, 79, 87, 72, 82, 65, 28],
+    "GOAL":    [25, 25, 25, 25, 25, 25, 25, 25]
+}
+
+# Latest values (last element of each list)
+oil_latest = 100-oil_data["OIL_WATER"][-1]   # last DEFIANCE value
+ppm_latest = 100-oil_data["PPM_2um"][-1]
+cond_latest = 100-cw_data["CONDUCTIVITY"][-1]
+
+
 
 #region HTML section
 # HTML template for the website with improved design and images
@@ -1912,6 +1933,31 @@ html_template = """
             </div>
           </div>
 
+          <div class="chart-row">
+            
+            <!-- Chart 3: CJC Filters -->
+            <div class="chart-card">
+              <div style="display:flex; justify-content:space-around;">
+                <div>
+                  <div class="chart-counter" data-target="{{ oil_latest }}" id="oilCounter">0</div>
+                  <div class="chart-subtitle">Oil Water Reduction</div>
+                </div>
+                <div>
+                  <div class="chart-counter" data-target="{{ ppm_latest }}" id="ppmCounter">0</div>
+                  <div class="chart-subtitle">PPM Reduction</div>
+                </div>
+              </div>
+              <canvas id="oilChart"></canvas>
+            </div>
+
+            <!-- Chart 4: IWTM conductivity -->
+            <div class="chart-card">
+              <div class="chart-counter" data-target="{{ cond_latest }}" id="condCounter">0</div>
+              <div class="chart-subtitle">Vessel TFC Values</div>
+              <canvas id="condChart"></canvas>
+            </div>
+
+          </div>
 
 
           <h2>Analytics</h2>
@@ -2332,6 +2378,9 @@ html_template = """
       animateCounter("fuelCounter", {{ fuel_latest }});
       animateCounter("avgCounter", {{ avg_latest }});
       animateCounter("goalCounter", {{ goal_latest }});
+      animateCounter("oilCounter", {{ oil_latest }});
+      animateCounter("ppmCounter", {{ ppm_latest }});
+      animateCounter("condCounter", {{ cond_latest }});
 
       // --- Chart 1: Fuel Consumption ---
       new Chart(document.getElementById("fuelChart").getContext("2d"), {
@@ -2434,6 +2483,94 @@ html_template = """
         }
 
       });
+
+      // --- Chart 3: Oil and PPm ---
+      new Chart(document.getElementById("oilChart").getContext("2d"), {
+        type: "line",
+        data: {
+          labels: {{ oil_data.weeks|tojson }},
+          datasets: [
+            {
+              label: "OIL_WATER",
+              data: {{ oil_data.OIL_WATER|tojson }},
+              borderColor: "#2e7d32",
+              backgroundColor: "rgba(46,125,50,0.15)",
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            },
+            {
+              label: "PPM_2um",
+              data: {{ oil_data.PPM_2um|tojson }},
+              borderColor: "#6a1b9a",
+              borderDash: [6,6],  // dashed line
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",   //  legend below chart
+              labels: {
+                font: {
+                  size: 11   //  reduce font size (default ~12 13)
+                },
+                boxWidth: 14,   // make legend markers smaller
+                padding: 12     // adjust spacing between items
+              }
+            }
+          }
+        }
+
+      });
+
+      // --- Chart 4: conductivity ---
+      new Chart(document.getElementById("condChart").getContext("2d"), {
+        type: "line",
+        data: {
+          labels: {{ cw_data.months|tojson }},
+          datasets: [
+            {
+              label: "CONDUCTIVITY",
+              data: {{ cw_data.CONDUCTIVITY|tojson }},
+              borderColor: "#2e7d32",
+              backgroundColor: "rgba(46,125,50,0.15)",
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            },
+            {
+              label: "Goal",
+              data: {{ cw_data.GOAL|tojson }},
+              borderColor: "#6a1b9a",
+              borderDash: [6,6],  // dashed line
+              tension: 0.4,
+              borderWidth: 2,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",   //  legend below chart
+              labels: {
+                font: {
+                  size: 11   //  reduce font size (default ~12 13)
+                },
+                boxWidth: 14,   // make legend markers smaller
+                padding: 12     // adjust spacing between items
+              }
+            }
+          }
+        }
+
+      });
     });
     </script>
 
@@ -2463,11 +2600,17 @@ def index():
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
         kpis_section=kpis_section, #to not forget
+        #value for charts
         fuel_data=fuel_data,
         goal_data=goal_data,
         fuel_latest=fuel_latest,
         avg_latest=avg_latest,
         goal_latest=goal_latest,
+        oil_data=oil_data,
+        cw_data=cw_data,
+        oil_latest = oil_latest, 
+        ppm_latest = ppm_latest, 
+        cond_latest = cond_latest,
     )
 
 #region login
