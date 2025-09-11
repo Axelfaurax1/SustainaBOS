@@ -332,14 +332,14 @@ plt.savefig('static/top_vessels_chart.png')
 
 # --- Fuel Consumption Data (Monthly) ---
 fuel_data = {
-    "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
-    "TFC":      [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
-    "DEFIANCE": [194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
-    "PRINCIPLE":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
-    "PRIME":    [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+    "DEFIANCE":      [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
+    "PRINCIPLE": [194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
+    "PRIME":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
+    "PRELUDE":    [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
 
 goal_data = {
-    "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
     "AVERAGE": [123.1525, 126.1825, 175.94, 142.63, 157.8375, 165.18, 159.2325, 127.54],
     "GOAL":    [104.679625, 100.946, 123.158, 114.104, 126.27, 132.144, 127.386, 114.786]
 }
@@ -1487,7 +1487,7 @@ html_template = """
             </div>
           </div>
           <div>
-            <img src="{{ url_for('static', filename='green_leaf3.png') }}" alt="SustainaBOS">
+            <img src="{{ url_for('static', filename='green_leaf2.png') }}" alt="SustainaBOS">
           </div>
         </div>
 
@@ -2340,8 +2340,8 @@ html_template = """
           labels: {{ fuel_data.months|tojson }},
           datasets: [
             {
-              label: "TFC",
-              data: {{ fuel_data.TFC|tojson }},
+              label: "Defiance",
+              data: {{ fuel_data.DEFIANCE|tojson }},
               borderColor: "#2e7d32",
               backgroundColor: "rgba(46,125,50,0.2)",
               fill: true,
@@ -2349,24 +2349,24 @@ html_template = """
               borderWidth: 2
             },
             {
-              label: "DEFIANCE",
-              data: {{ fuel_data.DEFIANCE|tojson }},
+              label: "Principle",
+              data: {{ fuel_data.PRINCIPLE|tojson }},
               borderColor: "#6a1b9a",
               fill: false,
               tension: 0.4,
               borderWidth: 2
             },
             {
-              label: "PRINCIPLE",
-              data: {{ fuel_data.PRINCIPLE|tojson }},
+              label: "Prime",
+              data: {{ fuel_data.PRIME|tojson }},
               borderColor: "#1565c0",
               fill: false,
               tension: 0.4,
               borderWidth: 2
             },
             {
-              label: "PRIME",
-              data: {{ fuel_data.PRIME|tojson }},
+              label: "Prelude",
+              data: {{ fuel_data.PRELUDE|tojson }},
               borderColor: "#ef6c00",
               fill: false,
               tension: 0.4,
@@ -2630,6 +2630,8 @@ def login():
     """
     return render_template_string(login_page, step=step, error=error)
 
+#region Survey
+
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
     vessels = list(listvessel_df['BOS DUBAI'])  # your DataFrame
@@ -2799,6 +2801,8 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
+#region Roles
+
 @app.route("/roles")
 def roles():
     if session.get("user") != "Axel":
@@ -2827,6 +2831,35 @@ def roles():
     </div>
     """, carnet=carnet)
 
+@app.route("/devlog")
+def devlog():
+    if session.get("user") != "Axel":
+        abort(403)
+    devlogL = DeviceLog.query.order_by(DeviceLog.vessel_name.desc()).all()
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Device added Log</h2>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width:100%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th>Action</th>
+            <th>Vessel</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in devlogL %}
+          <tr>
+            <td>{{ m.action }}</td>
+            <td>{{ m.vessel_name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """, devlogL=devlogL)
+
+#region Metrics
 @app.route("/metrics")
 def metrics():
     if session.get("user") != "Axel":
@@ -2857,7 +2890,7 @@ def metrics():
     </div>
     """, data=data)
 
-#region admin
+#region Admin
 
 @app.route("/admin")
 def admin_dashboard():
@@ -2946,10 +2979,15 @@ def admin_dashboard():
                     <p>Add new application users.</p>
                 </a>
                 <a href="{{ url_for('roles') }}" class="feature-card">
-                    <div class="media">📄</div>
+                    <div class="media">🔥</div>
                     <h4>User Roles</h4>
                     <p>See all users and roles.</p>
-                </a>                  
+                </a>
+                <a href="{{ url_for('devlog') }}" class="feature-card">
+                    <div class="media">📄</div>
+                    <h4>Devices added</h4>
+                    <p>See all added devices.</p>
+                </a>                                    
             </div>
         </div>
     </body>
@@ -2993,6 +3031,7 @@ def admin_add_user():
     </div>
     """, message=message)
 
+#region Chat
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
