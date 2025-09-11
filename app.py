@@ -808,7 +808,7 @@ html_template = """
     }
 
     .chart-counter {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: var(--brand-green);
       margin-bottom: 10px;
@@ -2827,6 +2827,34 @@ def roles():
     </div>
     """, carnet=carnet)
 
+@app.route("/devlog")
+def devlog():
+    if session.get("user") != "Axel":
+        abort(403)
+    devlogL = DeviceLog.query.order_by(DeviceLog.vessel_name.desc()).all()
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Device added Log</h2>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width:100%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th>Action</th>
+            <th>Vessel</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in devlogL %}
+          <tr>
+            <td>{{ m.action }}</td>
+            <td>{{ m.vessel_name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """, devlogL=devlogL)
+
 @app.route("/metrics")
 def metrics():
     if session.get("user") != "Axel":
@@ -2949,7 +2977,12 @@ def admin_dashboard():
                     <div class="media">📄</div>
                     <h4>User Roles</h4>
                     <p>See all users and roles.</p>
-                </a>                  
+                </a> 
+                <a href="{{ url_for('devlog') }}" class="feature-card">
+                    <div class="media">📄</div>
+                    <h4>Devices added</h4>
+                    <p>See all added Devices.</p>
+                </a>                                         
             </div>
         </div>
     </body>
