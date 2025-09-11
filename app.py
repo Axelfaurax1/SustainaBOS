@@ -333,10 +333,10 @@ plt.savefig('static/top_vessels_chart.png')
 # --- Fuel Consumption Data (Monthly) ---
 fuel_data = {
     "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
-    "TFC":      [53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
-    "DEFIANCE": [194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
-    "PRINCIPLE":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
-    "PRIME":    [125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
+    "DEFIANCE":[53.26, 101.05, 134.43, 157.72, 164.31, 148.86, 146.98, 114.46],
+    "PRINCIPLE":[194.55, 111.68, 206.97, 152.42, 162.69, 176.43, 194.75, 143.17],
+    "PRIME":[119.5, 155.3, 198.36, 150.38, 179.65, 179.63, 154.3, 166.73],
+    "PRELUDE":[125.3, 136.7, 164.0, 110.0, 124.7, 155.8, 140.9, 85.8] }
 
 goal_data = {
     "months": ["Janvier", "Fevrier", "Mars", "April", "Mai", "Juin", "Juillet", "Aout"],
@@ -345,7 +345,7 @@ goal_data = {
 }
 
 # Latest values (last element of each list)
-fuel_latest = fuel_data["TFC"][-1]   # last TFC value
+fuel_latest = fuel_data["DEFIANCE"][-1]   # last DEFIANCE value
 avg_latest = goal_data["AVERAGE"][-1]
 goal_latest = goal_data["GOAL"][-1]
 
@@ -1892,7 +1892,7 @@ html_template = """
             <!-- Chart 1: Fuel -->
             <div class="chart-card">
               <div class="chart-counter" data-target="{{ fuel_latest }}" id="fuelCounter">0</div>
-              <div class="chart-subtitle">Latest TFC Value</div>
+              <div class="chart-subtitle">Mean TFC Value</div>
               <canvas id="fuelChart"></canvas>
             </div>
 
@@ -1901,11 +1901,11 @@ html_template = """
               <div style="display:flex; justify-content:space-around;">
                 <div>
                   <div class="chart-counter" data-target="{{ avg_latest }}" id="avgCounter">0</div>
-                  <div class="chart-subtitle">Latest Average</div>
+                  <div class="chart-subtitle">Last Average</div>
                 </div>
                 <div>
                   <div class="chart-counter" data-target="{{ goal_latest }}" id="goalCounter">0</div>
-                  <div class="chart-subtitle">Latest Goal</div>
+                  <div class="chart-subtitle">Mean Goal</div>
                 </div>
               </div>
               <canvas id="goalChart"></canvas>
@@ -2340,8 +2340,8 @@ html_template = """
           labels: {{ fuel_data.months|tojson }},
           datasets: [
             {
-              label: "TFC",
-              data: {{ fuel_data.TFC|tojson }},
+              label: "DEFIANCE",
+              data: {{ fuel_data.DEFIANCE|tojson }},
               borderColor: "#2e7d32",
               backgroundColor: "rgba(46,125,50,0.2)",
               fill: true,
@@ -2349,17 +2349,9 @@ html_template = """
               borderWidth: 2
             },
             {
-              label: "DEFIANCE",
-              data: {{ fuel_data.DEFIANCE|tojson }},
-              borderColor: "#6a1b9a",
-              fill: false,
-              tension: 0.4,
-              borderWidth: 2
-            },
-            {
               label: "PRINCIPLE",
               data: {{ fuel_data.PRINCIPLE|tojson }},
-              borderColor: "#1565c0",
+              borderColor: "#6a1b9a",
               fill: false,
               tension: 0.4,
               borderWidth: 2
@@ -2367,6 +2359,14 @@ html_template = """
             {
               label: "PRIME",
               data: {{ fuel_data.PRIME|tojson }},
+              borderColor: "#1565c0",
+              fill: false,
+              tension: 0.4,
+              borderWidth: 2
+            },
+            {
+              label: "PRELUDE",
+              data: {{ fuel_data.PRELUDE|tojson }},
               borderColor: "#ef6c00",
               fill: false,
               tension: 0.4,
