@@ -1892,7 +1892,7 @@ html_template = """
             <!-- Chart 1: Fuel -->
             <div class="chart-card">
               <div class="chart-counter" data-target="{{ fuel_latest }}" id="fuelCounter">0</div>
-              <div class="chart-subtitle">Mean TFC Value</div>
+              <div class="chart-subtitle">Vessel TFC Values</div>
               <canvas id="fuelChart"></canvas>
             </div>
 
@@ -1901,11 +1901,11 @@ html_template = """
               <div style="display:flex; justify-content:space-around;">
                 <div>
                   <div class="chart-counter" data-target="{{ avg_latest }}" id="avgCounter">0</div>
-                  <div class="chart-subtitle">Last Average</div>
+                  <div class="chart-subtitle">Mean TFC</div>
                 </div>
                 <div>
                   <div class="chart-counter" data-target="{{ goal_latest }}" id="goalCounter">0</div>
-                  <div class="chart-subtitle">Mean Goal</div>
+                  <div class="chart-subtitle">Mean TFC Goal</div>
                 </div>
               </div>
               <canvas id="goalChart"></canvas>
@@ -2374,7 +2374,21 @@ html_template = """
             }
           ]
         },
-        options: { responsive: true }
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",   //  legend below chart
+              labels: {
+                font: {
+                  size: 11   //  reduce font size (default ~12 13)
+                },
+                boxWidth: 14,   // make legend markers smaller
+                padding: 12     // adjust spacing between items
+              }
+            }
+          }
+        }
       });
 
       // --- Chart 2: Average vs Goal ---
@@ -2403,7 +2417,22 @@ html_template = """
             }
           ]
         },
-        options: { responsive: true }
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",   //  legend below chart
+              labels: {
+                font: {
+                  size: 11   //  reduce font size (default ~12 13)
+                },
+                boxWidth: 14,   // make legend markers smaller
+                padding: 12     // adjust spacing between items
+              }
+            }
+          }
+        }
+
       });
     });
     </script>
@@ -2979,7 +3008,7 @@ def admin_dashboard():
                     <p>See all users and roles.</p>
                 </a> 
                 <a href="{{ url_for('devlog') }}" class="feature-card">
-                    <div class="media">📄</div>
+                    <div class="media">🔥</div>
                     <h4>Devices added</h4>
                     <p>See all added Devices.</p>
                 </a>                                         
