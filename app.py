@@ -353,13 +353,13 @@ goal_latest = goal_data["GOAL"][-1]
 # --- Oil lub and CW Water Data (Monthly) ---
 oil_data = {
     "weeks": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
-    "OIL_WATER":[87.5, 54, 50.5, 55, 46, 35, 31, 28],
-    "PPM_2um":[91, 79, 56, 53, 29, 17, 16, 9],
+    "OIL_WATER":[87.5, 54, 50.5, 55, 46, 35, 31, 28.1],
+    "PPM_2um":[91, 79, 56, 53, 29, 17, 16, 9.8],
 }
 
 cw_data = {
     "weeks": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
-    "CONDUCTIVITY": [94, 84, 79, 87, 72, 82, 65, 31],
+    "CONDUCTIVITY": [94, 84, 79, 87, 72, 82, 65, 31.2],
     "GOAL":    [25, 25, 25, 25, 25, 25, 25, 25]
 }
 
@@ -1939,11 +1939,11 @@ html_template = """
             <div class="chart-card">
               <div style="display:flex; justify-content:space-around;">
                 <div>
-                  <div class="chart-counter" data-target="{{ oil_latest }}" id="oilCounter">0</div>
+                  <div class="chart-counter" data-target="{{ oil_latest }}" data-suffix="%" id="oilCounter">0</div>
                   <div class="chart-subtitle">Oil Water Reduction</div>
                 </div>
                 <div>
-                  <div class="chart-counter" data-target="{{ ppm_latest }}" id="ppmCounter">0</div>
+                  <div class="chart-counter" data-target="{{ ppm_latest }}" data-suffix="%" id="ppmCounter">0</div>
                   <div class="chart-subtitle">PPM Reduction</div>
                 </div>
               </div>
@@ -1952,7 +1952,7 @@ html_template = """
 
             <!-- Chart 4: IWTM conductivity -->
             <div class="chart-card">
-              <div class="chart-counter" data-target="{{ cond_latest }}" id="condCounter">0</div>
+              <div class="chart-counter" data-target="{{ cond_latest }}" data-suffix="%" id="condCounter">0</div>
               <div class="chart-subtitle">CW Conductivity Reduction</div>
               <canvas id="condChart"></canvas>
             </div>
@@ -2359,16 +2359,18 @@ html_template = """
       // 🔥 Counter animation function
       function animateCounter(id, target) {
         const el = document.getElementById(id);
+        if (!el) return; // safeguard
+        const suffix = el.dataset.suffix || ""; //  read suffix
         let count = 0;
         const step = target / 60; // ~1s animation
 
         function update() {
           count += step;
           if (count < target) {
-            el.textContent = Math.floor(count);
+            el.textContent = Math.floor(count)+suffix;
             requestAnimationFrame(update);
           } else {
-            el.textContent = target.toFixed(2); // keep decimals if needed
+            el.textContent = target.toFixed(1)+suffix; // final value + suffixkeep , decimals if needed
           }
         }
         update();
