@@ -359,7 +359,7 @@ oil_data = {
 
 cw_data = {
     "weeks": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8"],
-    "CONDUCTIVITY": [94, 84, 79, 87, 72, 82, 65, 28],
+    "CONDUCTIVITY": [94, 84, 79, 87, 72, 82, 65, 31],
     "GOAL":    [25, 25, 25, 25, 25, 25, 25, 25]
 }
 
@@ -1953,7 +1953,7 @@ html_template = """
             <!-- Chart 4: IWTM conductivity -->
             <div class="chart-card">
               <div class="chart-counter" data-target="{{ cond_latest }}" id="condCounter">0</div>
-              <div class="chart-subtitle">Vessel TFC Values</div>
+              <div class="chart-subtitle">CW Conductivity Reduction</div>
               <canvas id="condChart"></canvas>
             </div>
 
@@ -2538,10 +2538,10 @@ html_template = """
               label: "CONDUCTIVITY",
               data: {{ cw_data.CONDUCTIVITY|tojson }},
               borderColor: "#2e7d32",
-              backgroundColor: "rgba(46,125,50,0.15)",
+              backgroundColor: "rgba(46,125,50,0.2)",
               tension: 0.4,
               borderWidth: 2,
-              fill: false
+              fill: true
             },
             {
               label: "Goal",
