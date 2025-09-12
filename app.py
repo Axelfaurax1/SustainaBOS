@@ -1912,7 +1912,7 @@ html_template = """
           <div class="chart-row">
             <!-- Chart 1: Fuel -->
             <div class="chart-card">
-              <div class="chart-counter" data-target="{{ fuel_latest }}" id="fuelCounter">0</div>
+              <div class="chart-counter" data-target="{{ fuel_latest }}" data-suffix=" m³" id="fuelCounter">0</div>
               <div class="chart-subtitle">Vessel TFC Values</div>
               <canvas id="fuelChart"></canvas>
             </div>
@@ -1921,11 +1921,11 @@ html_template = """
             <div class="chart-card">
               <div style="display:flex; justify-content:space-around;">
                 <div>
-                  <div class="chart-counter" data-target="{{ avg_latest }}" id="avgCounter">0</div>
+                  <div class="chart-counter" data-target="{{ avg_latest }}" data-suffix=" m³" id="avgCounter">0</div>
                   <div class="chart-subtitle">Mean TFC</div>
                 </div>
                 <div>
-                  <div class="chart-counter" data-target="{{ goal_latest }}" id="goalCounter">0</div>
+                  <div class="chart-counter" data-target="{{ goal_latest }}" data-suffix=" m³" id="goalCounter">0</div>
                   <div class="chart-subtitle">Mean TFC Goal</div>
                 </div>
               </div>
@@ -3059,6 +3059,44 @@ def metrics():
     </div>
     """, data=data)
 
+@app.route("/spinergie")
+def spinergie():
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Sucess criterias</h2>
+      <h3>Smart reporting</h3>
+      <p>- DPR : A central platform</p>
+      <p>- Unisea Daily Midnight Report</p>
+      <p>- Smart, Accurate, Efficient Reporting system.</p>
+      <p>- Flexibility</p>
+      <p>- Reports emissions (DNV BV RINA)</p>
+      <p>- Fuel Consumption Declaration form.</p>
+      <p>- Analytics, KPI’s</p>
+      <h3>Operation Performance</h3>
+      <p>- AIS integration and Live Tracking</p>
+      <p>- Real-Time Alerts</p>
+      <p>- KPI Dashboard (Same as picture)</p>
+      <h3>Vessel Performance</h3>
+      <p>- Fuel Multiple Sensors Integration</p>
+      <p>- Performance Degradation</p>
+      <p>- SFOC, ME main load degradation</p>
+      <p>- Silicon Paint insights</p>
+      <p>- CO2 Emission Measurement</p>
+      <p>- Fuel theft prevention.</p>
+      <p>- Analytics, KPI’s</p>
+      <p>- Vessel Performance Consultancy</p>
+      <p>- Export function, in .csv</p>
+      <h3>Data Integration</h3>
+      <p>- DAS installation</p>
+      <p>- API Integration</p>
+      <p>- AIS Integration</p>
+      <br>
+      <br>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """)
+
+
 #region admin
 
 @app.route("/admin")
@@ -3148,7 +3186,7 @@ def admin_dashboard():
                     <p>Add new application users.</p>
                 </a>
                 <a href="{{ url_for('roles') }}" class="feature-card">
-                    <div class="media">📄</div>
+                    <div class="media">🔑</div>
                     <h4>User Roles</h4>
                     <p>See all users and roles.</p>
                 </a> 
@@ -3156,7 +3194,13 @@ def admin_dashboard():
                     <div class="media">🔥</div>
                     <h4>Devices added</h4>
                     <p>See all added Devices.</p>
-                </a>                                         
+                </a> 
+                </a> 
+                <a href="{{ url_for('spinergie') }}" class="feature-card">
+                    <div class="media">📄</div>
+                    <h4>Spinergie POC</h4>
+                    <p>Sucess criterias and infos.</p>
+                </a>                                              
             </div>
         </div>
     </body>
