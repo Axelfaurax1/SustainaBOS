@@ -2614,10 +2614,10 @@ html_template = """
       new Chart(document.getElementById("vesselChart").getContext("2d"), {
         type: "bar",
         data: {
-          labels: {{ vessels10.names|tojson }},
+          labels: {{ vessels10["names"] |tojson }},
           datasets: [{
             label: "Savings",
-            data: {{ vessels10.values|tojson }},
+            data: {{ vessels10["values"] |tojson }},
             backgroundColor: "rgba(46,125,50,0.7)",   // green
             borderColor: "#2e7d32",
             borderWidth: 1,
@@ -2646,9 +2646,9 @@ html_template = """
       new Chart(document.getElementById("deviceChart").getContext("2d"), {
         type: "doughnut",
         data: {
-          labels: {{ donutdev.labels|tojson }},
+          labels: {{ donutdev["labels"] |tojson }},
           datasets: [{
-            data: {{ donutdev.values|tojson }},
+            data: {{ donutdev["values"] |tojson }},
             backgroundColor: [
               "#2e7d32", // green
               "#6a1b9a", // purple
