@@ -303,6 +303,8 @@ listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary'
 # print(listvessel_df)
 # print(listvessel_df.columns)
 
+#Unuseful section below, before the region charts
+
 # Filter the relevant vessels
 vessels_of_interest = df[df['Vessel Name/ ID'].astype(str).str.contains('Britoil|ENA Habitat|BOS|Lewek Hydra|Nautical Aisia|Nautical Anisha|Paragon Sentinel', na=False)]
 
@@ -320,7 +322,6 @@ vessel_devices['Total Savings'] = vessel_devices['Savings/year (fuel efficiency)
 # Get the top 10 vessels with the best performance
 top_vessels = vessel_devices.groupby('Vessel Name/ ID')['Total Savings'].sum().nlargest(10).reset_index()
 
-#region charts
 # Create a bar chart for the top 10 vessels
 plt.figure(figsize=(10, 6))
 plt.bar(top_vessels['Vessel Name/ ID'], top_vessels['Total Savings'], color='blue')
@@ -330,6 +331,8 @@ plt.title('Top 10 Vessels with Best Performance')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('static/top_vessels_chart.png')
+
+#region charts
 
 # --- Fuel Consumption Data (Monthly) ---
 fuel_data = {
@@ -368,9 +371,23 @@ oil_latest = 100-oil_data["OIL_WATER"][-1]   # last DEFIANCE value
 ppm_latest = 100-oil_data["PPM_2um"][-1]
 cond_latest = 100-cw_data["CONDUCTIVITY"][-1]
 
+# --- Top 10 Vessel Savings (Summary!A99:B108) ---
+
+vessels10r = summary_raw.loc[98:107, 0].dropna().tolist()  # Column A (names)
+savings10r = pd.to_numeric(summary_raw.loc[98:107, 1], errors="coerce").fillna(0).tolist()  # Column B (values)
+
+vessels10 = {"names": vessels10r, "values": savings10r}
+
+# --- Savings by Device (hardcoded for now) ---
+donutdev = {
+    "labels": ["IWTM P10", "EFMS", "MGPS", "LED", "Nautilus Log", "Shore Generator"],
+    "values": [216, 289, 400, 320, 80, 50]
+}
+
 
 
 #region HTML section
+
 # HTML template for the website with improved design and images
 html_template = """
 <!DOCTYPE html>
@@ -1959,6 +1976,21 @@ html_template = """
 
           </div>
 
+          <div class="chart-row">
+            <!-- Chart 5: Best Vessels -->
+            <div class="chart-card">
+              <h3>Top 10 Vessel Savings</h3>
+              <canvas id="vesselChart"></canvas>
+            </div>
+
+            <!-- Chart 6: Savings by Device -->
+            <div class="chart-card">
+              <h3>Savings by Device</h3>
+              <canvas id="deviceChart"></canvas>
+            </div>
+          </div>
+
+
 
           <h2>Analytics</h2>
 
@@ -2573,7 +2605,71 @@ html_template = """
         }
 
       });
+
+      // --- Chart 5: Top 10 Vessels Savings (Bar) ---
+      new Chart(document.getElementById("vesselChart").getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: {{ vessels10.names|tojson }},
+          datasets: [{
+            label: "Savings",
+            data: {{ vessels10.values|tojson }},
+            backgroundColor: "rgba(46,125,50,0.7)",   // green
+            borderColor: "#2e7d32",
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "rgba(0,0,0,0.05)" }
+            },
+            y: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "rgba(0,0,0,0.05)" }
+            }
+          }
+        }
+      });
+
+      // --- Chart 6: Savings by Device (Donut) ---
+      new Chart(document.getElementById("deviceChart").getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: {{ donutdev.labels|tojson }},
+          datasets: [{
+            data: {{ donutdev.values|tojson }},
+            backgroundColor: [
+              "#2e7d32", // green
+              "#6a1b9a", // purple
+              "#1565c0", // blue
+              "#ef6c00", // orange
+              "#00897b", // teal
+              "#c62828"  // red
+            ],
+            borderWidth: 2,
+            borderColor: "#fff"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { font: { size: 11 } }
+            }
+          }
+        }
+      });
     });
+   
+
     </script>
 
 
@@ -2613,6 +2709,8 @@ def index():
         oil_latest = oil_latest, 
         ppm_latest = ppm_latest, 
         cond_latest = cond_latest,
+        vessels10 = vessels10,
+        donutdev = donutdev
     )
 
 #region login
