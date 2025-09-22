@@ -386,8 +386,8 @@ donutdev = {
     "values": [216, 289, 400, 320, 80, 50]
 }
 
-print(type(vessels10["names"]), type(vessels10["values"]))
-print(type(donutdev["labels"]), type(donutdev["values"]))
+#print(type(vessels10["names"]), type(vessels10["values"]))
+#print(type(donutdev["labels"]), type(donutdev["values"]))
 
 
 #region HTML section
@@ -2690,6 +2690,12 @@ html_template = """
 def index():
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    
+    import json
+    print(json.dumps(vessels10))  # ← vérifie que ça passe
+    print(json.dumps(donutdev))   # ← vérifie que ça passe
+
 
     return render_template_string(
         html_template,
