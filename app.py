@@ -3200,7 +3200,13 @@ def admin_dashboard():
                     <div class="media">📄</div>
                     <h4>Spinergie POC</h4>
                     <p>Sucess criterias and infos.</p>
-                </a>                                              
+                </a>
+                <a href="{{ url_for('admin_reset_password') }}" class="feature-card">
+                    <div class="media">🔄</div>
+                    <h4>Reset Password</h4>
+                    <p>Reset a user’s password to default.</p>
+                </a>
+                                              
             </div>
         </div>
     </body>
@@ -3239,6 +3245,39 @@ def admin_add_user():
       <form method="post">
         <input type="text" name="username" placeholder="Enter username" required>
         <button type="submit">Create User</button>
+      </form>
+      <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
+    </div>
+    """, message=message)
+
+@app.route("/admin/reset_password", methods=["GET", "POST"])
+def admin_reset_password():
+    if session.get("user") != "Axel":   # only admin
+        abort(403)
+
+    message = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        if username:
+            user = User2.query.filter_by(username=username).first()
+            if user:
+                # regenerate the default password
+                default_password = f"BOS{username.lower()}*"
+                user.password_hash = generate_password_hash(default_password)
+                db.session.commit()
+                message = f"Password for {username} reset to default ({default_password})."
+            else:
+                message = f"User {username} does not exist!"
+
+    return render_template_string("""
+    <div class="container section content">
+      <h2>Reset User Password</h2>
+      {% if message %}
+        <p><strong>{{ message }}</strong></p>
+      {% endif %}
+      <form method="post">
+        <input type="text" name="username" placeholder="Enter username to reset" required>
+        <button type="submit">Reset Password</button>
       </form>
       <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
     </div>
