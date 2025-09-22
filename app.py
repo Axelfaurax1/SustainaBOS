@@ -373,10 +373,12 @@ cond_latest = 100-cw_data["CONDUCTIVITY"][-1]
 
 # --- Top 10 Vessel Savings (Summary!A99:B108) ---
 
-vessels10r = summary_raw.loc[98:107, 0].dropna().tolist()  # Column A (names)
+vessels10r = summary_raw.loc[98:107, 0].dropna().astype(str).tolist()  # Column A (names)
 savings10r = pd.to_numeric(summary_raw.loc[98:107, 1], errors="coerce").fillna(0).tolist()  # Column B (values)
 
 vessels10 = {"names": vessels10r, "values": savings10r}
+
+print(vessels10)
 
 # --- Savings by Device (hardcoded for now) ---
 donutdev = {
@@ -2710,7 +2712,7 @@ def index():
         ppm_latest = ppm_latest, 
         cond_latest = cond_latest,
         vessels10 = vessels10,
-        donutdev = donutdev
+        donutdev = donutdev,
     )
 
 #region login
