@@ -386,6 +386,8 @@ donutdev = {
     "values": [216, 289, 400, 320, 80, 50]
 }
 
+print(type(vessels10["names"]), type(vessels10["values"]))
+print(type(donutdev["labels"]), type(donutdev["values"]))
 
 
 #region HTML section
