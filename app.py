@@ -9,15 +9,14 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Create a Flask app
+app = Flask(__name__)
 
 from datetime import timedelta
 app.permanent_session_lifetime = timedelta(minutes=30)  #This is to relogout after 30min
 # I removed session.parement=true, mais browser is keeping user cookies. So i need to force it other way. 
 # By using and forcing with timedelta, i need to put back session.parement=true after username
 # This line timedelta is for the time for session after login, directly see if time =30 then 30min ?
-
-# Create a Flask app
-app = Flask(__name__)
 
 # Database connection (Render provides DATABASE_URL in env vars)
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://sustainabos_db_user:iNmAcRXSGKOSHgvQGzltdBUSMcDz0dZN@dpg-d2r54315pdvs738sd3i0-a/sustainabos_db")
