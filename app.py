@@ -10,9 +10,11 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-#from datetime import timedelta
-# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)  # or days=1
-#Thus is for the time for session after login, directly see session permanent=true line
+from datetime import timedelta
+app.permanent_session_lifetime = timedelta(minutes=30)  #This is to relogout after 30min
+# I removed session.parement=true, mais browser is keeping user cookies. So i need to force it other way. 
+# By using and forcing with timedelta, i need to put back session.parement=true after username
+# This line timedelta is for the time for session after login, directly see if time =30 then 30min ?
 
 # Create a Flask app
 app = Flask(__name__)
@@ -378,7 +380,7 @@ savings10r = pd.to_numeric(summary_raw.loc[98:107, 1], errors="coerce").fillna(0
 
 vessels10 = {"names": vessels10r, "values": savings10r}
 
-print(vessels10)
+#print(vessels10)
 
 # --- Savings by Device (hardcoded for now) ---
 donutdev = {
@@ -2702,8 +2704,8 @@ def index():
 
     
     import json
-    print(json.dumps(vessels10))  # ← vérifie que ça passe
-    print(json.dumps(donutdev))   # ← vérifie que ça passe
+    #print(json.dumps(vessels10))   ← vérifie que ça passe
+    #print(json.dumps(donutdev))    ← vérifie que ça passe
 
 
     return render_template_string(
@@ -2771,6 +2773,7 @@ def login():
                 else:
                     # normal login
                     session['user'] = username
+                    session.permanent = True 
                     log = Metric(metric_name=username, value=0)
                     db.session.add(log)
                     db.session.commit()
@@ -2797,6 +2800,7 @@ def login():
                     db.session.commit()
                     session.pop('pending_user')
                     session['user'] = username
+                    session.permanent = True
 
                     log = Metric(metric_name=f"{username}_password_changed", value=1)
                     db.session.add(log)
