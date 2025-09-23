@@ -2009,12 +2009,14 @@ html_template = """
           <div class="chart-row">
             <!-- Chart 5: Best Vessels -->
             <div class="chart-card">
+              <div class="chart-counter" data-target="81.2" data-suffix=" k" id="top10Counter">0</div>
               <div class="chart-subtitle">Total Savings Defiance</div>
               <canvas id="vesselChart"></canvas>
             </div>
 
             <!-- Chart 6: Savings by Device -->
             <div class="chart-card">
+              <div class="chart-counter" data-target="318.5" data-suffix=" k" id="savdevCounter">0</div>
               <div class="chart-subtitle">Total Savings LED</div>
               <canvas id="deviceChart"></canvas>
             </div>
@@ -2734,6 +2736,7 @@ def index():
 
     return render_template_string(
         html_template,
+        username=session.get("user")
         vessel_devices=vessel_devices,
         list_df=list_df,
         summary_df=summary_df,
@@ -2743,6 +2746,7 @@ def index():
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
         kpis_section=kpis_section, #to not forget
+
         #value for charts
         fuel_data=fuel_data,
         goal_data=goal_data,
