@@ -2736,7 +2736,7 @@ def index():
 
     return render_template_string(
         html_template,
-        username=session.get("user")
+        username=session.get("user"),
         vessel_devices=vessel_devices,
         list_df=list_df,
         summary_df=summary_df,
