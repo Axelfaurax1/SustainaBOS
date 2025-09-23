@@ -2426,7 +2426,7 @@ html_template = """
         if (!el) return; // safeguard
         const suffix = el.dataset.suffix || ""; //  read suffix
         let count = 0;
-        const step = target / 60; // ~1s animation
+        const step = target / 600; // ~1s animation
 
         function update() {
           count += step;
@@ -2447,6 +2447,8 @@ html_template = """
       animateCounter("oilCounter", {{ oil_latest }});
       animateCounter("ppmCounter", {{ ppm_latest }});
       animateCounter("condCounter", {{ cond_latest }});
+      animateCounter("top10Counter", 81.2);
+      animateCounter("savdevCounter", 318.5);
 
       // --- Chart 1: Fuel Consumption ---
       new Chart(document.getElementById("fuelChart").getContext("2d"), {
