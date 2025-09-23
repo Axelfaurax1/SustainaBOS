@@ -512,6 +512,27 @@ html_template = """
           font-size: 0.9rem;
         }
 
+        #fab-username {
+          position: fixed;
+          bottom: 38px;   /* vertically centered with FAB */
+          right: 110px;   /* space to the left of FAB */
+          font-size: 14px;
+          font-weight: 600;
+          color: #6a1b9a; /* brand purple */
+          background: #fff;
+          padding: 6px 12px;
+          border-radius: 12px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          z-index: 10000;
+          transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        #fab-username:hover {
+           transform: translateY(-2px);
+           background: rgba(106,27,154,0.1); /* subtle purple hover */
+        }
+
+
         #splash {
            position: fixed;
            top: 0;
@@ -1367,6 +1388,10 @@ html_template = """
     <img src="{{ url_for('static', filename='green_leaf.png') }}" alt="FAB Logo">
     </a>
 
+    <div id="fab-username">
+       {{ username }}
+    </div>
+
     <div id="fab-menu" class="hidden">
       <button onclick="openChat()">Chat</button>
       <button onclick="refreshPage()">Refresh</button>
@@ -1984,13 +2009,13 @@ html_template = """
           <div class="chart-row">
             <!-- Chart 5: Best Vessels -->
             <div class="chart-card">
-              <h3>Top 10 Vessel Savings</h3>
+              <div class="chart-subtitle">Total Savings Defiance</div>
               <canvas id="vesselChart"></canvas>
             </div>
 
             <!-- Chart 6: Savings by Device -->
             <div class="chart-card">
-              <h3>Savings by Device</h3>
+              <div class="chart-subtitle">Total Savings LED</div>
               <canvas id="deviceChart"></canvas>
             </div>
           </div>
