@@ -2644,32 +2644,41 @@ html_template = """
 
       // --- Chart 6: Savings by Device (Donut) ---
       new Chart(document.getElementById("deviceChart").getContext("2d"), {
-        type: "doughnut",
+        type: "bar",
         data: {
           labels: {{ donutdev["labels"] |tojson }},
           datasets: [{
             data: {{ donutdev["values"] |tojson }},
             backgroundColor: [
-              "#2e7d32", // green
-              "#6a1b9a", // purple
-              "#1565c0", // blue
-              "#ef6c00", // orange
-              "#00897b", // teal
-              "#c62828"  // red
+              "rgba(106,27,154,0.7)",  // violet
+              "rgba(142,36,170,0.7)",  // violet clair
+              "rgba(46,125,50,0.7)",   // vert foncé
+              "rgba(76,175,80,0.7)",   // vert clair
+              "rgba(0,150,136,0.7)",   // teal
+              "rgba(129,199,132,0.7)"  // vert pastel
             ],
-            borderWidth: 2,
-            borderColor: "#fff"
+            borderColor: "#fff",
+            borderWidth: 1,
+            borderRadius: 6
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: "bottom",
-              labels: { font: { size: 11 } }
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "rgba(0,0,0,0.05)" }
+            },
+            y: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "rgba(0,0,0,0.05)" }
             }
           }
         }
+
       });
     });
    
