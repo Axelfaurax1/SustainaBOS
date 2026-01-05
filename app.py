@@ -2801,7 +2801,7 @@ def login():
                     #"Ser Boon": "BOSseta*",
                     #"Siva": "BOSsira*",
                     #"Alessandro": "BOSalba*",
-                }
+                #}
 
                 
                 default_password = f"BOS{username.lower()}*"
