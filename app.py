@@ -2114,6 +2114,11 @@ html_template = """
          <h3>Sustainability Report 2024</h3>
          Here is the sustainabilty report of 2024. I hope this new website could be involve in the next Sustainability Report 2025. Or help to do it. Here is the PDF display. <br> <br> 
          <iframe src="{{ url_for('static', filename='Report2024.pdf') }}" width="100%" height="600px">
+         </iframe>
+         <br>
+         <h3>ENI Carbon Simulator Report 2025</h3>
+         Here is the ENI Carbon simulator report of 2025. You can download the PDF directly. <br> <br>
+         <iframe src="{{ url_for('static', filename='ENICarbon2025.pdf') }}" width="100%" height="600px">
          <!-- This browser does not support PDFs. Please download the PDF to view it: 
              <a href="{{ url_for('static', filename='Report2024.pdf') }}">Download PDF</a> -->
              
@@ -2426,7 +2431,7 @@ html_template = """
         if (!el) return; // safeguard
         const suffix = el.dataset.suffix || ""; //  read suffix
         let count = 0;
-        const step = target / 600; // ~1s animation
+        const step = target / 60; // ~1s animation , done when arriving on home so will run before arriving
 
         function update() {
           count += step;
@@ -2782,24 +2787,34 @@ def login():
             user = User2.query.filter_by(username=username).first()
             if user and check_password_hash(user.password_hash, password):
                 # check if it's still default password
-                default_users = {
-                    "Axel": "BOSaxfa*",
-                    "admin": "secret123",
-                    "Mohit": "BOSmosa*",
-                    "Florent": "BOSflki*",
-                    "Julian": "BOSjuoh*",
-                    "Richard": "BOSrihi*",
-                    "Ernest": "BOSerlo*",
-                    "Sundar": "BOSsucc*",
-                    "Ser Boon": "BOSseta*",
-                    "Siva": "BOSsira*",
-                    "Alessandro": "BOSalba*",
+                # previously i used the hardcoded one to check and ask new password
+                # now i'll use generated pattern
+                #default_users = {
+                    #"Axel": "BOSaxfa*",
+                    #"admin": "secret123",
+                    #"Mohit": "BOSmosa*",
+                    #"Florent": "BOSflki*",
+                    #"Julian": "BOSjuoh*",
+                    #"Richard": "BOSrihi*",
+                    #"Ernest": "BOSerlo*",
+                    #"Sundar": "BOSsucc*",
+                    #"Ser Boon": "BOSseta*",
+                    #"Siva": "BOSsira*",
+                    #"Alessandro": "BOSalba*",
                 }
 
-                if default_users.get(username) == password:
-                    # switch to change-password step
+                
+                default_password = f"BOS{username.lower()}*"
+                if password == default_password:
                     session['pending_user'] = username
-                    step = "change_password"
+                    step = "change_password"  # render the change-password form
+
+
+                #if default_users.get(username) == password:
+                    # #switch to change-password step
+                    #session['pending_user'] = username
+                    #step = "change_password"
+
                 else:
                     # normal login
                     session['user'] = username
