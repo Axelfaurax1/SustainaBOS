@@ -2814,7 +2814,7 @@ def index():
         summary_df=summary_df,
         summary2_df=summary2_df,
         summary3_df=summary3_df,
-        initiative_desc_json=initiative_desc_map,
+        initiative_desc_map=initiative_desc_map,
         listvessel_df=listvessel_df,
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
