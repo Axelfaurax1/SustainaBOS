@@ -168,7 +168,7 @@ kpi_co2 = round(kpi_co2_raw, 0)                      # zero decimal for tonnes
 # Prepare a list for the template (we’ll animate these later)
 kpis = [
     {"title": "Initiatives", "value": kpi_devices,    "suffix": "",
-        "back": ["8 initiatives certified", "7 initiatives on POC"]},
+        "back": ["8 initiatives certified", "9 initiatives on POC"]},
     {"title": "2025 Fuel Gain",        "value": kpi_gain, "suffix": "%",
         "back": ["Scope 1 Only. Goal 2026:", "20% Fuel savings"]},
     {"title": "CO₂ Savings",       "value": kpi_co2,        "suffix": " t",
@@ -2814,7 +2814,7 @@ def index():
         summary_df=summary_df,
         summary2_df=summary2_df,
         summary3_df=summary3_df,
-        nitiative_desc_json=initiative_desc_map,
+        initiative_desc_json=initiative_desc_map,
         listvessel_df=listvessel_df,
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
