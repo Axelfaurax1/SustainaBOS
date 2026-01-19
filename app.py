@@ -158,7 +158,7 @@ def _num(i, j):
 
 kpi_devices_raw     = int(_num(24, 2))   # C25 (row index -1, col index -1)
 kpi_gain_raw  = _num(4, 9) *100       # J5
-kpi_co2_raw         = _num(21, 2)        # C24
+kpi_co2_raw         = _num(23, 2)        # C24
 
 # Clean / round:
 kpi_devices = int(round(kpi_devices_raw))            # integer count
@@ -316,10 +316,10 @@ def get_device_summary_route():
 #print(M)
 
 # Load the list of vessel
-listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=24,  nrows=73, usecols="A")
+listvessel_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=26,  nrows=72, usecols="A")
 
 # Load the list of devices
-listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=15, usecols="A")
+listdevice_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=17, usecols="A")
 #print(listdevice_df)
 
 
@@ -1403,29 +1403,56 @@ html_template = """
     
 
     
-    // Make sure you pass initiative_desc_map in render_template(...)
-    const initiativeDescriptions = {{ initiative_desc_map | tojson | safe }} || {};
+    
+    // 1) Properly inject your initiative -> description map from Python/Jinja
+      //    This must be a single JSON object, nothing appended after it.
+      const initiativeDescriptions = {{ initiative_desc_map | tojson | safe }};
 
-    function showInitiativeDescription(name) {
-      const titleEl = document.getElementById('initiativeInfoTitle');
-      const bodyEl  = document.getElementById('initiativeInfoBody');
-      const boxEl   = document.getElementById('initiativeInfo');
+      // 2) Optional: simple normalizer (if you want to match different casing/spaces)
+      function norm(s) {
+        return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      }
 
-      if (!titleEl || !bodyEl || !boxEl) return;
+      // Build a normalized lookup once (optional but helps with 'LED lights' vs 'LED Lights')
+      const initiativeDescriptionsNorm = (() => {
+        const m = {};
+        for (const [k, v] of Object.entries(initiativeDescriptions || {})) {
+          m[norm(k)] = v;
+        }
+        return m;
+      })();
 
-      // Try normalized key first, then raw
-      const keyNorm = _norm(name);
-      const desc =
-        initiativeDescriptions[keyNorm] ??
-        initiativeDescriptions[name] ??
-        'No description available';
+      // 3) Show the short description in the info box
+      function showInitiativeDescription(name) {
+        const titleEl = document.getElementById('initiativeInfoTitle');
+        const bodyEl  = document.getElementById('initiativeInfoBody');
+        const boxEl   = document.getElementById('initiativeInfo');
+        if (!titleEl || !bodyEl || !boxEl) return;
 
-      // Use textContent to avoid HTML injection
-      titleEl.textContent = name || '—';
-      bodyEl.textContent  = desc;
+        // Try exact match, then normalized
+        const desc =
+          initiativeDescriptions[name] ||
+          initiativeDescriptionsNorm[norm(name)] ||
+          'No description available';
 
-      boxEl.style.display = 'block';
-    }
+        titleEl.textContent = name;                     // or: name + ' —'
+        bodyEl.textContent  = String(desc);
+        boxEl.style.display = 'block';
+      }
+
+      // 4) Keep your existing function; just ensure it calls showInitiativeDescription first
+      function selectDeviceFromCard(deviceName){
+        // Show the short description box
+        showInitiativeDescription(deviceName);
+
+        // Sync hidden dropdown then reuse your existing fetch logic
+        const dd = document.getElementById('deviceDropdown');
+        if (dd){
+          dd.value = deviceName;
+          confirmDeviceSelection(); // calls /get_device_summary and fills #deviceSummaryDisplay
+        }
+      }
+
 
 
 
