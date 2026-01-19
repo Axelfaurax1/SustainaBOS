@@ -18,6 +18,23 @@ app.permanent_session_lifetime = timedelta(minutes=30)  #This is to relogout aft
 # By using and forcing with timedelta, i need to put back session.parement=true after username
 # This line timedelta is for the time for session after login, directly see if time =30 then 30min ?
 
+
+# ---------------- [ORG_ONLY] demo guard helpers ----------------
+from functools import wraps
+
+def org_only(f):
+    """
+    Decorator: block access for 'Demo' account to protected routes.
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if session.get("user") == "Demo":
+            abort(403, description="Demo users cannot access this resource.")
+        return f(*args, **kwargs)
+    return wrapper
+# ----------------------------------------------------------------
+
+
 # Database connection (Render provides DATABASE_URL in env vars)
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://sustainabos_db_user:iNmAcRXSGKOSHgvQGzltdBUSMcDz0dZN@dpg-d2r54315pdvs738sd3i0-a/sustainabos_db")
 
@@ -116,14 +133,20 @@ file_path = 'Vessel_Device_Installation_Tracker NV.xlsx'
 column_names = ['Vessel Name/ ID', 'Spec', 'Devices', 'Installation Status', 'Date of Installation', 'Savings/year (fuel efficiency)', 'Savings/year (Maitenance)', 'Co2 savings ton/year']
 df = pd.read_excel(file_path, engine='openpyxl', names=column_names, skiprows=7, usecols="B:I")
 
-list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=466, usecols="B:J")
+list_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Tracker', skiprows=6, nrows=470, usecols="B:J")
 
 # Load the summary sheet
-summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=16, usecols="A:F")
+summary_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=18, usecols="A:F")
 
 summary2_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=15,  nrows=3, usecols="B:C")
 
 summary3_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=0,  nrows=4, usecols="I:K")
+
+summary4_df = pd.read_excel(file_path, engine='openpyxl', sheet_name='Summary', skiprows=1,  nrows=17, usecols="Y:Z")
+
+# Convert to dict { "EFMS": "Energy & Fuel...", ... }
+initiative_desc_map = dict(zip(summary4_df.iloc[:,0], summary4_df.iloc[:,1]))
+
 
 # --- KPIs for Home (Summary!C21:C23) ---
 # We read the sheet without headers so we can address Excel cells by (row-1, col-1)
@@ -133,9 +156,9 @@ def _num(i, j):
     v = pd.to_numeric(summary_raw.iat[i, j], errors='coerce')
     return 0 if pd.isna(v) else float(v)
 
-kpi_devices_raw     = int(_num(22, 2))   # C23 (row index -1, col index -1)
+kpi_devices_raw     = int(_num(24, 2))   # C25 (row index -1, col index -1)
 kpi_gain_raw  = _num(4, 9) *100       # J5
-kpi_co2_raw         = _num(21, 2)        # C22
+kpi_co2_raw         = _num(21, 2)        # C24
 
 # Clean / round:
 kpi_devices = int(round(kpi_devices_raw))            # integer count
@@ -1352,6 +1375,11 @@ html_template = """
         }
 
     function selectDeviceFromCard(deviceName){
+
+      
+      //Show the short description box
+      showInitiativeDescription(deviceName);
+
       // Sync hidden dropdown then reuse your existing fetch logic
       const dd = document.getElementById('deviceDropdown');
       if (dd){
@@ -1371,6 +1399,35 @@ html_template = """
         next.addEventListener('click', () => track.scrollBy({left:  step(), behavior:'smooth'}));
       }
     });
+
+    
+
+    
+  / Make sure you pass initiative_desc_map in render_template(...)
+    const initiativeDescriptions = {{ initiative_desc_map | tojson | safe }} || {};
+
+    function showInitiativeDescription(name) {
+      const titleEl = document.getElementById('initiativeInfoTitle');
+      const bodyEl  = document.getElementById('initiativeInfoBody');
+      const boxEl   = document.getElementById('initiativeInfo');
+
+      if (!titleEl || !bodyEl || !boxEl) return;
+
+      // Try normalized key first, then raw
+      const keyNorm = _norm(name);
+      const desc =
+        initiativeDescriptions[keyNorm] ??
+        initiativeDescriptions[name] ??
+        'No description available';
+
+      // Use textContent to avoid HTML injection
+      titleEl.textContent = name || '—';
+      bodyEl.textContent  = desc;
+
+      boxEl.style.display = 'block';
+    }
+
+
 
     </script>
 
@@ -1692,6 +1749,14 @@ html_template = """
 
 
           <!--  This is where the summary table will appear -->
+
+          
+          <!-- 1) Initiative info (short description) -->
+          <div id="initiativeInfo" style="margin-top: 16px; margin-bottom: 10px; display:none;">
+            <div id="initiativeInfoTitle" style="font-weight:600; font-size:18px; color:#4b0082;"></div>
+            <div id="initiativeInfoBody" style="margin-top:6px; font-size:15px; color:#333;"></div>
+          </div>
+
           <div id="vesselSummaryDisplay" style="margin-top: 20px;"></div>
           <div id="deviceSummaryDisplay" style="margin-top: 20px;"></div>
 
@@ -2749,6 +2814,7 @@ def index():
         summary_df=summary_df,
         summary2_df=summary2_df,
         summary3_df=summary3_df,
+        nitiative_desc_json=initiative_desc_map,
         listvessel_df=listvessel_df,
         listdevice_df=listdevice_df,
         kpis=kpis,   # ← add this line
@@ -3451,6 +3517,7 @@ def admin_reset_password():
 
 
 @app.route("/chat", methods=["GET", "POST"])
+@org_only  # ← this is where @org_only protects access to KPI content
 def chat():
     if request.method == "POST":
         data = request.get_json()
