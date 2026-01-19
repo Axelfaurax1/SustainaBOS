@@ -1403,7 +1403,7 @@ html_template = """
     
 
     
-  / Make sure you pass initiative_desc_map in render_template(...)
+    // Make sure you pass initiative_desc_map in render_template(...)
     const initiativeDescriptions = {{ initiative_desc_map | tojson | safe }} || {};
 
     function showInitiativeDescription(name) {
