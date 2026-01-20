@@ -103,12 +103,6 @@ OKTA_REDIRECT_URI = os.getenv("OKTA_REDIRECT_URI", "http://localhost:5000/callba
 
 app.config.setdefault("PREFERRED_URL_SCHEME", "https")
 
-# --- OAuth2 base helper (handles Org vs Custom Authorization Server) ---
-def _oauth2_base():
-    # If issuer already includes '/oauth2', it's a custom AS; otherwise Org AS -> append '/oauth2'
-    return OKTA_ISSUER if '/oauth2' in OKTA_ISSUER else f"{OKTA_ISSUER}/oauth2"
-
-
 # --- PKCE helpers ---
 def _b64url(raw: bytes) -> str:
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
@@ -2909,7 +2903,7 @@ def login():
     session['oauth_state'] = state
     session['oauth_nonce'] = nonce
 
-    authorize_url = f"{_oauth2_base()}/v1/authorize"
+    authorize_url = f"{OKTA_ISSUER}/v1/authorize"
     params = {
         'client_id': OKTA_CLIENT_ID,
         'response_type': 'code',
@@ -2933,7 +2927,7 @@ def oidc_callback():
     if not code or not state or state != session.get('oauth_state'):
         abort(400, description='Invalid OAuth state or missing authorization code.')
 
-    token_url = f"{_oauth2_base()}/v1/token"
+    token_url = f"{OKTA_ISSUER}/v1/token"
     data = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -2941,10 +2935,9 @@ def oidc_callback():
         'client_id': OKTA_CLIENT_ID,
         'code_verifier': session.get('pkce_verifier'),
     }
-    
-    # PKCE public client — do NOT send client_secret
-    tok = requests.post(token_url, data=data, timeout=15)
+    auth = (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET) if OKTA_CLIENT_SECRET else None
 
+    tok = requests.post(token_url, data=data, auth=auth, timeout=15)
     if tok.status_code != 200:
         abort(400, description=f"Token exchange failed ({tok.status_code}): {tok.text}")
 
@@ -2954,7 +2947,7 @@ def oidc_callback():
     if not id_token or not access_token:
         abort(400, description='Missing tokens in token response.')
 
-    jwks_client = PyJWKClient(f"{_oauth2_base()}/v1/keys")
+    jwks_client = PyJWKClient(f"{OKTA_ISSUER}/v1/keys")
     signing_key = jwks_client.get_signing_key_from_jwt(id_token)
     claims = jwt.decode(
         id_token,
@@ -2969,7 +2962,7 @@ def oidc_callback():
         abort(400, description='Invalid nonce.')
 
     ui = requests.get(
-        f"{_oauth2_base()}/v1/userinfo",
+        f"{OKTA_ISSUER}/v1/userinfo",
         headers={'Authorization': f'Bearer {access_token}'},
         timeout=15,
     )
@@ -3374,7 +3367,7 @@ def logout():
     session.clear()
 
     post_logout = url_for('login', _external=True)
-    logout_url = f"{_oauth2_base()}/v1/logout"
+    logout_url = f"{OKTA_ISSUER}/v1/logout"
     params = {'post_logout_redirect_uri': post_logout}
     if id_token:
         params['id_token_hint'] = id_token
