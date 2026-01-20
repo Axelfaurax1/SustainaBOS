@@ -3512,7 +3512,7 @@ def spinergie():
 
 @app.route("/admin")
 def admin_dashboard():
-    if session.get("user") != "Axel":
+    if session.get("user") != "Axel Loric":
         abort(403)  # Forbidden
 
     return render_template_string("""
