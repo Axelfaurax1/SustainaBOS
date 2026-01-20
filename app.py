@@ -2934,16 +2934,20 @@ def oidc_callback():
         abort(400, description='Invalid OAuth state or missing authorization code.')
 
     token_url = f"{_oauth2_base()}/v1/token"
-    data = {
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': OKTA_REDIRECT_URI,
-        'client_id': OKTA_CLIENT_ID,
-        'code_verifier': session.get('pkce_verifier'),
-    }
-    auth = (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET) if OKTA_CLIENT_SECRET else None
+        
+    # Keep this: authenticate with Basic using client_id + client_secret
+    auth = (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET)
 
+    # Remove client_id from data (do NOT include it in the body)
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": OKTA_REDIRECT_URI,
+        "code_verifier": session.get("pkce_verifier"),
+    }
     tok = requests.post(token_url, data=data, auth=auth, timeout=15)
+
+
     if tok.status_code != 200:
         abort(400, description=f"Token exchange failed ({tok.status_code}): {tok.text}")
 
