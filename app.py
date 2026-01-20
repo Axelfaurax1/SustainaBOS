@@ -2941,9 +2941,10 @@ def oidc_callback():
         'client_id': OKTA_CLIENT_ID,
         'code_verifier': session.get('pkce_verifier'),
     }
-    auth = (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET) if OKTA_CLIENT_SECRET else None
+    
+    # PKCE public client — do NOT send client_secret
+    tok = requests.post(token_url, data=data, timeout=15)
 
-    tok = requests.post(token_url, data=data, auth=auth, timeout=15)
     if tok.status_code != 200:
         abort(400, description=f"Token exchange failed ({tok.status_code}): {tok.text}")
 
