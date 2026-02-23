@@ -8,15 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-# --- Okta OIDC imports ---
-import base64
-import hashlib
-import secrets
-from urllib.parse import urlencode
-import requests
-import jwt
-from jwt import PyJWKClient
-
 
 # Create a Flask app
 app = Flask(__name__)
@@ -93,33 +84,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 # For the password later
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-now")
-# --- Okta OIDC configuration ---
-OKTA_ISSUER = os.getenv("OKTA_ISSUER", "https://YOUR_OKTA_DOMAIN/oauth2/default").rstrip("/")
-OKTA_CLIENT_ID = os.getenv("OKTA_CLIENT_ID", "YOUR_CLIENT_ID")
-OKTA_CLIENT_SECRET = os.getenv("OKTA_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
-# In Render production this should be: https://sustainabos.render.com/callback
-OKTA_REDIRECT_URI = os.getenv("OKTA_REDIRECT_URI", "http://localhost:5000/callback")
-
-app.config.setdefault("PREFERRED_URL_SCHEME", "https")
-
-# --- OAuth2 base helper (handles Org vs Custom Authorization Server) ---
-def _oauth2_base():
-    # If issuer already includes '/oauth2', it's a custom AS; otherwise Org AS -> append '/oauth2'
-    return OKTA_ISSUER if '/oauth2' in OKTA_ISSUER else f"{OKTA_ISSUER}/oauth2"
-
-
-# --- PKCE helpers ---
-def _b64url(raw: bytes) -> str:
-    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
-
-def generate_pkce_pair():
-    # verifier must be 43..128 chars; using 64 bytes gives ~86 chars
-    verifier = _b64url(secrets.token_bytes(64))
-    challenge = _b64url(hashlib.sha256(verifier.encode("ascii")).digest())
-    return verifier, challenge
-
-  # set a real value in Render later
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-now")  # set a real value in Render later
 
 # --- Simple users (change these!) ---
 users = {
@@ -2898,119 +2863,10 @@ def index():
     )
 
 #region login
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Create PKCE + state/nonce for CSRF/Replay defenses
-    code_verifier, code_challenge = generate_pkce_pair()
-    state = _b64url(secrets.token_bytes(32))
-    nonce = _b64url(secrets.token_bytes(32))
-
-    session['pkce_verifier'] = code_verifier
-    session['oauth_state'] = state
-    session['oauth_nonce'] = nonce
-
-    authorize_url = f"{_oauth2_base()}/v1/authorize"
-    params = {
-        'client_id': OKTA_CLIENT_ID,
-        'response_type': 'code',
-        'scope': 'openid profile email',
-        'redirect_uri': OKTA_REDIRECT_URI,
-        'state': state,
-        'nonce': nonce,
-        'code_challenge': code_challenge,
-        'code_challenge_method': 'S256',
-    }
-    return redirect(f"{authorize_url}?{urlencode(params)}")
-
-@app.route('/callback')
-def oidc_callback():
-    error = request.args.get('error')
-    if error:
-        abort(400, description=f"Okta error: {error}: {request.args.get('error_description','')}")
-
-    code = request.args.get('code')
-    state = request.args.get('state')
-    if not code or not state or state != session.get('oauth_state'):
-        abort(400, description='Invalid OAuth state or missing authorization code.')
-
-    token_url = f"{_oauth2_base()}/v1/token"
-        
-    # Keep this: authenticate with Basic using client_id + client_secret
-    auth = (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET)
-
-    # Remove client_id from data (do NOT include it in the body)
-    data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": OKTA_REDIRECT_URI,
-        "code_verifier": session.get("pkce_verifier"),
-    }
-    tok = requests.post(token_url, data=data, auth=auth, timeout=15)
-
-
-    if tok.status_code != 200:
-        abort(400, description=f"Token exchange failed ({tok.status_code}): {tok.text}")
-
-    token_set = tok.json()
-    id_token = token_set.get('id_token')
-    access_token = token_set.get('access_token')
-    if not id_token or not access_token:
-        abort(400, description='Missing tokens in token response.')
-
-    jwks_client = PyJWKClient(f"{_oauth2_base()}/v1/keys")
-    signing_key = jwks_client.get_signing_key_from_jwt(id_token)
-    claims = jwt.decode(
-        id_token,
-        signing_key.key,
-        algorithms=['RS256'],
-        audience=OKTA_CLIENT_ID,
-        issuer=OKTA_ISSUER,
-        options={'require': ['exp', 'iat', 'nonce']},
-        leeway=60,
-    )
-    if claims.get('nonce') != session.get('oauth_nonce'):
-        abort(400, description='Invalid nonce.')
-
-    ui = requests.get(
-        f"{_oauth2_base()}/v1/userinfo",
-        headers={'Authorization': f'Bearer {access_token}'},
-        timeout=15,
-    )
-    userinfo = ui.json() if ui.status_code == 200 else {}
-
-    # Prefer given_name to maintain existing 'Axel' admin checks
-    display_name = (
-        userinfo.get('given_name')
-        or userinfo.get('name')
-        or userinfo.get('preferred_username')
-        or userinfo.get('email')
-        or claims.get('given_name')
-        or claims.get('preferred_username')
-        or claims.get('email')
-        or 'User'
-    )
-
-    session['user'] = display_name
-    session['id_token'] = id_token
-    session['access_token'] = access_token
-    session.permanent = True
-
-    # Optional: log login event
-    try:
-        log = Metric(metric_name=str(display_name), value=0)
-        db.session.add(log)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-    # Clean one-time values
-    session.pop('pkce_verifier', None)
-    session.pop('oauth_state', None)
-    session.pop('oauth_nonce', None)
-
-    return redirect(url_for('index'))
-
-
+    if 'user' in session:
+        return redirect(url_for('index'))
 
     step = "login"   # default form
     error = None
@@ -3373,16 +3229,8 @@ def survey_results():
 
 @app.route('/logout')
 def logout():
-    id_token = session.pop('id_token', None)
-    session.clear()
-
-    post_logout = url_for('login', _external=True)
-    logout_url = f"{_oauth2_base()}/v1/logout"
-    params = {'post_logout_redirect_uri': post_logout}
-    if id_token:
-        params['id_token_hint'] = id_token
-    return redirect(f"{logout_url}?{urlencode(params)}")
-
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
 @app.route("/roles")
 def roles():
