@@ -2258,13 +2258,11 @@ html_template = """
 
       </div>
 
-    </div>
-
-
-
           
 
-
+          <br>
+          <br>
+          <br>
           <h3>Old Analytics</h3>
           <table>
               {% for index, row in summary3_df.iterrows() %}
