@@ -435,7 +435,7 @@ avg_vessels_in_operation_2025 = 71  # From your request
 kpis_global_2025 = [
     {"title": "TFC 2025 (Global)", "value": kpi_tfc, "suffix": " t"},  # keep your existing TFC global KPI
     {"title": "Avg. Vessels in Operation", "value": avg_vessels_in_operation_2025, "suffix": ""},
-    {"title": "Charter Fuel Accountable", "value": 81, "suffix": "%"}
+    {"title": "Charter Fuel Accountable", "value": 81.0, "suffix": "%"}
 ]
 
 # LED clarification: show CO2 instead of money
@@ -2645,35 +2645,55 @@ html_template = """
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // 🔥 Counter animation function
-      function animateCounter(id, target) {
-        const el = document.getElementById(id);
-        if (!el) return; // safeguard
-        const suffix = el.dataset.suffix || ""; //  read suffix
-        let count = 0;
-        const step = target / 60; // ~1s animation , done when arriving on home so will run before arriving
+      
+               
+     
 
-        function update() {
-          count += step;
-          if (count < target) {
-            el.textContent = Math.floor(count)+suffix;
-            requestAnimationFrame(update);
-          } else {
-            el.textContent = target.toFixed(1)+suffix; // final value + suffixkeep , decimals if needed
-          }
+      // 🔥 Counter animation for NEW HTML (.chart-counter + data-target)
+      function animateCounterElement(el, rawTarget) {
+        const suffix = el.dataset.suffix || "";
+
+        // Parse target safely (handles "", null, "1,234", etc.)
+        let target = rawTarget;
+        if (typeof target === "string") target = target.replace(/,/g, "").trim();
+        target = Number(target);
+
+        // If invalid number, keep 0 + suffix
+        if (!Number.isFinite(target)) {
+          el.textContent = "0" + suffix;
+          return;
         }
-        update();
+
+        // Decimals: optional via data-decimals="0|1|2", else auto
+        const decimals = el.dataset.decimals !== undefined
+          ? Number(el.dataset.decimals)
+          : (target % 1 !== 0 ? 1 : 0);
+
+        const duration = 900; // ms
+        const start = performance.now();
+
+        function tick(now) {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3); // ease-out
+          const value = target * eased;
+
+          el.textContent = value.toFixed(decimals) + suffix;
+
+          if (p < 1) requestAnimationFrame(tick);
+          else el.textContent = target.toFixed(decimals) + suffix; // exact final
+        }
+
+        requestAnimationFrame(tick);
       }
 
-      // Run counters
-      animateCounter("fuelCounter", {{ fuel_latest }});
-      animateCounter("avgCounter", {{ avg_latest }});
-      animateCounter("goalCounter", {{ goal_latest }});
-      animateCounter("oilCounter", {{ oil_latest }});
-      animateCounter("ppmCounter", {{ ppm_latest }});
-      animateCounter("condCounter", {{ cond_latest }});
-      animateCounter("top10Counter", 81.2);
-      animateCounter("savdevCounter", 318.5);
+      // ✅ Run counters: animate every element that matches your HTML
+      document.querySelectorAll(".chart-counter").forEach(el => {
+        animateCounterElement(el, el.dataset.target);
+      });
+
+
+
+
 
       /* =========================================================
       KPI’s 2025 — GLOBAL + VESSEL SPECIFIC (FINAL JS BLOCK)
@@ -3084,6 +3104,7 @@ def index():
         tfc_2025_mean=tfc_2025_mean,
         tfc_2025_goal=tfc_2025_goal,
         fuel_charter_accountable=fuel_charter_accountable,
+        kpi_tfc=kpi_tfc;
         avg_vessels_in_operation_2025=avg_vessels_in_operation_2025,
         led_co2_savings_2025=led_co2_savings_2025,
         kpi_titles=kpi_titles,
