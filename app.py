@@ -447,7 +447,7 @@ kpi_titles = {
     "iwtm": "IWTM (CW Conductivity)",
     "cjc": "CJC (Water & particles reduction)"
 }
-``
+
 
 # ---------------- KPI's 2025 - VESSEL SPECIFIC (Deviation Factor) ----------------
 # Estimated points based on your screenshots (Prime + Principle)
