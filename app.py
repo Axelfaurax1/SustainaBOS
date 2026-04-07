@@ -3104,7 +3104,7 @@ def index():
         tfc_2025_mean=tfc_2025_mean,
         tfc_2025_goal=tfc_2025_goal,
         fuel_charter_accountable=fuel_charter_accountable,
-        kpi_tfc=kpi_tfc;
+        kpi_tfc=kpi_tfc,
         avg_vessels_in_operation_2025=avg_vessels_in_operation_2025,
         led_co2_savings_2025=led_co2_savings_2025,
         kpi_titles=kpi_titles,
