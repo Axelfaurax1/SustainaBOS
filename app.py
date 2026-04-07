@@ -410,6 +410,87 @@ donutdev = {
     "values": [216, 289, 400, 320, 80, 50]
 }
 
+
+# ---------------- KPI's 2025 - GLOBAL (full year) ----------------
+
+tfc_2025_global = {
+    "year": 2025,
+    "months": ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    # Estimated from your screenshot (Total Consumption - Month)
+    "values": [8000, 7400, 8600, 8600, 10700, 10300, 11400, 10600, 11200, 11800, 9600, 10000]
+}
+
+tfc_2025_mean = sum(tfc_2025_global["values"]) / len(tfc_2025_global["values"])
+# Keep same logic as your existing "Mean TFC Goal" style: set a goal slightly below mean (≈ -8%)
+tfc_2025_goal = round(tfc_2025_mean * 0.92, 0)
+
+fuel_charter_accountable = {
+    "labels": ["Accountable", "Non-accountable"],
+    "values": [81, 19]   # From your screenshot
+}
+
+avg_vessels_in_operation_2025 = 71  # From your request
+
+# KPI cards (GLOBAL 2025)
+kpis_global_2025 = [
+    {"title": "TFC 2025 (Global)", "value": kpi_tfc, "suffix": " t"},  # keep your existing TFC global KPI
+    {"title": "Avg. Vessels in Operation", "value": avg_vessels_in_operation_2025, "suffix": ""},
+    {"title": "Charter Fuel Accountable", "value": 81, "suffix": "%"}
+]
+
+# LED clarification: show CO2 instead of money
+led_co2_savings_2025 = 15000  # tCO2 (requested)
+
+# Optional: titles harmonization for existing charts
+kpi_titles = {
+    "led": "LED (CO₂ savings)",
+    "iwtm": "IWTM (CW Conductivity)",
+    "cjc": "CJC (Water & particles reduction)"
+}
+``
+
+# ---------------- KPI's 2025 - VESSEL SPECIFIC (Deviation Factor) ----------------
+# Estimated points based on your screenshots (Prime + Principle)
+
+prime_dev_factor = {
+    "name": "PRIME - Smoothed deviation factor",
+    "dates": [
+        "2024-07-15","2024-08-15","2024-09-15","2024-10-15","2024-11-15","2024-12-15",
+        "2025-01-15","2025-02-15","2025-03-15","2025-04-15","2025-05-15","2025-06-15",
+        "2025-07-15","2025-08-15","2025-09-15","2025-10-15","2025-11-15","2025-12-15",
+        "2026-01-15","2026-02-15","2026-03-15"
+    ],
+    "values": [
+        1.00,1.02,1.03,1.05,1.06,1.08,
+        1.09,1.10,1.12,1.13,1.15,1.09,
+        1.10,1.12,1.14,1.16,1.18,1.20,
+        1.22,1.23,1.24
+    ],
+    "event_markers": [
+        {"date": "2025-06-01", "label": "Other"}  # orange vertical band in screenshot
+    ]
+}
+
+principle_dev_factor = {
+    "name": "PRINCIPLE - Smoothed deviation factor",
+    "dates": [
+        "2024-07-15","2024-08-15","2024-09-15","2024-10-15","2024-11-15","2024-12-15",
+        "2025-01-15","2025-02-15","2025-03-15","2025-04-15","2025-05-15","2025-06-15",
+        "2025-07-15","2025-08-15","2025-09-15","2025-10-15","2025-11-15","2025-12-15",
+        "2026-01-15"
+    ],
+    "values": [
+        1.18,1.22,1.25,1.28,1.32,1.35,
+        1.40,1.45,1.02,0.98,0.96,0.97,
+        0.98,0.95,0.92,0.95,1.00,1.08,
+        1.15
+    ],
+    "event_markers": [
+        {"date": "2025-03-01", "label": "Data start"}  # blue vertical bar in screenshot
+    ]
+}
+
+
 #print(type(vessels10["names"]), type(vessels10["values"]))
 #print(type(donutdev["labels"]), type(donutdev["values"]))
 
@@ -2037,100 +2118,149 @@ html_template = """
 
       </div>
 
+      
       <div id="analytics" class="section content hidden">
 
-          <div class="kpi-grid">
-            {% for k in kpis_section %}
-              <div class="kpi-simple-card">
-                <h3>{{ k.title }}</h3>
-                <div class="kpi-simple-value">{{ k.value }}{{ k.suffix }}</div>
-              </div>
-            {% endfor %}
+        <!-- ========================================================= -->
+        <!-- ================= KPI’s 2025 — GLOBAL =================== -->
+        <!-- ========================================================= -->
+
+        <h2 style="margin-bottom:15px;">KPI’s 2025 — GLOBAL</h2>
+
+        <div class="kpi-grid">
+          <div class="kpi-simple-card">
+            <h3>TFC 2025 (Global)</h3>
+            <div class="kpi-simple-value">{{ kpi_tfc }} t</div>
           </div>
 
-          <div class="chart-row">
-            <!-- Chart 1: Fuel -->
-            <div class="chart-card">
-              <div class="chart-counter" data-target="{{ fuel_latest }}" data-suffix=" m³" id="fuelCounter">0</div>
-              <div class="chart-subtitle">Vessel TFC Values</div>
-              <canvas id="fuelChart"></canvas>
-            </div>
-
-            <!-- Chart 2: Average vs Goal -->
-            <div class="chart-card">
-              <div style="display:flex; justify-content:space-around;">
-                <div>
-                  <div class="chart-counter" data-target="{{ avg_latest }}" data-suffix=" m³" id="avgCounter">0</div>
-                  <div class="chart-subtitle">Mean TFC</div>
-                </div>
-                <div>
-                  <div class="chart-counter" data-target="{{ goal_latest }}" data-suffix=" m³" id="goalCounter">0</div>
-                  <div class="chart-subtitle">Mean TFC Goal</div>
-                </div>
-              </div>
-              <canvas id="goalChart"></canvas>
-            </div>
+          <div class="kpi-simple-card">
+            <h3>Avg. Vessels in Operation</h3>
+            <div class="kpi-simple-value">71</div>
           </div>
 
-          <div class="chart-row">
-            
-            <!-- Chart 3: CJC Filters -->
-            <div class="chart-card">
-              <div style="display:flex; justify-content:space-around;">
-                <div>
-                  <div class="chart-counter" data-target="{{ oil_latest }}" data-suffix="%" id="oilCounter">0</div>
-                  <div class="chart-subtitle">Oil Water Reduction</div>
-                </div>
-                <div>
-                  <div class="chart-counter" data-target="{{ ppm_latest }}" data-suffix="%" id="ppmCounter">0</div>
-                  <div class="chart-subtitle">PPM Reduction</div>
-                </div>
-              </div>
-              <canvas id="oilChart"></canvas>
-            </div>
-
-            <!-- Chart 4: IWTM conductivity -->
-            <div class="chart-card">
-              <div class="chart-counter" data-target="{{ cond_latest }}" data-suffix="%" id="condCounter">0</div>
-              <div class="chart-subtitle">CW Conductivity Reduction</div>
-              <canvas id="condChart"></canvas>
-            </div>
-
+          <div class="kpi-simple-card">
+            <h3>Charter Fuel Accountable</h3>
+            <div class="kpi-simple-value">81%</div>
           </div>
+        </div>
 
-          <div class="chart-row">
-            <!-- Chart 5: Best Vessels -->
-            <div class="chart-card">
-              <div class="chart-counter" data-target="81.2" data-suffix=" k" id="top10Counter">0</div>
-              <div class="chart-subtitle">Total Savings Defiance</div>
-              <canvas id="vesselChart"></canvas>
+        <!-- ===== TFC MONTH + MEAN / GOAL ===== -->
+        <div class="chart-row">
+
+        <div class="chart-card">
+          <div class="chart-counter"
+               data-target="{{ tfc_2025_mean|round(0) }}"
+               data-suffix=" m³">0</div>
+          <div class="chart-subtitle">Total Consumption – Month (2025)</div>
+          <canvas id="tfcMonth2025Chart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div style="display:flex; justify-content:space-around;">
+            <div>
+              <div class="chart-counter"
+                   data-target="{{ tfc_2025_mean|round(0) }}"
+                   data-suffix=" m³">0</div>
+              <div class="chart-subtitle">Mean TFC</div>
             </div>
-
-            <!-- Chart 6: Savings by Device -->
-            <div class="chart-card">
-              <div class="chart-counter" data-target="318.5" data-suffix=" k" id="savdevCounter">0</div>
-              <div class="chart-subtitle">Total Savings LED</div>
-              <canvas id="deviceChart"></canvas>
+            <div>
+              <div class="chart-counter"
+                   data-target="{{ tfc_2025_goal|round(0) }}"
+                   data-suffix=" m³">0</div>
+              <div class="chart-subtitle">Mean TFC Goal</div>
             </div>
           </div>
+          <canvas id="tfcMeanGoal2025Chart"></canvas>
+        </div>
+
+      </div>
+
+      <!-- ===== CJC & IWTM ===== -->
+      <div class="chart-row">
+
+        <div class="chart-card">
+          <div style="display:flex; justify-content:space-around;">
+            <div>
+              <div class="chart-counter"
+                   data-target="{{ oil_latest }}"
+                   data-suffix="%">0</div>
+              <div class="chart-subtitle">CJC – Water Reduction</div>
+            </div>
+            <div>
+              <div class="chart-counter"
+                   data-target="{{ ppm_latest }}"
+                   data-suffix="%">0</div>
+               <div class="chart-subtitle">CJC – Particles Reduction</div>
+            </div>
+          </div>
+          <canvas id="oilChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-counter"
+               data-target="{{ cond_latest }}"
+               data-suffix="%">0</div>
+          <div class="chart-subtitle">IWTM – CW Conductivity Reduction</div>
+          <canvas id="condChart"></canvas>
+        </div>
+
+      </div>
+
+      <!-- ===== LED + CHARTER PIE ===== -->
+      <div class="chart-row">
+
+        <div class="chart-card">
+          <div class="chart-counter"
+               data-target="15000"
+               data-suffix=" tCO₂">0</div>
+          <div class="chart-subtitle">LED – CO₂ Savings (2025)</div>
+          <canvas id="ledChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-counter"
+               data-target="81"
+               data-suffix="%">0</div>
+          <div class="chart-subtitle">Charter Accountable for Fuel</div>
+          <canvas id="charterPieChart"></canvas>
+        </div>
+
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- ============ KPI’s 2025 — VESSEL SPECIFIC =============== -->
+      <!-- ========================================================= -->
+
+      <h2 style="margin:30px 0 15px;">KPI’s 2025 — VESSEL SPECIFIC</h2>
+
+      <!-- ===== TFC BY VESSEL ===== -->
+      <div class="chart-row">
+        <div class="chart-card">
+           <div class="chart-subtitle">
+            TFC by Vessel — DEFIANCE / PRIME / PRELUDE / PRINCIPLE
+          </div>
+          <canvas id="tfcVesselChart"></canvas>
+        </div>
+      </div>
+
+      <!-- ===== DEVIATION FACTOR ===== -->
+      <div class="chart-row">
+
+        <div class="chart-card">
+          <div class="chart-subtitle">PRIME — Smoothed Deviation Factor</div>
+          <canvas id="primeDeviationChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-subtitle">PRINCIPLE — Smoothed Deviation Factor</div>
+          <canvas id="principleDeviationChart"></canvas>
+        </div>
+
+      </div>
+
+    </div>
 
 
-
-          <h2>Analytics</h2>
-
-          <p> You can interact with BI charts after sign in. Refresh if any issues </p>
-
-          <h3>BI Analysis</h3>
-
-          <div id="analyticsContainer"></div>
-
-          <!-- <iframe title="SustainaBOS7" width="950" height="1250" src="https://app.powerbi.com/reportEmbed?reportId=19eea1f2-00f5-4fcf-8d6d-6bed6f27d0e5&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
-
-          <!-- <iframe title="SustainaBOS6" width="950" height="900" src="https://app.powerbi.com/reportEmbed?reportId=49b41197-4b6b-44b5-af29-6a685ea9dcdc&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
-
-          <!-- <h3>Introduction</h3>
-
-          <iframe title="SustainaBOS4" width="950" height="250" src="https://app.powerbi.com/reportEmbed?reportId=3720fb28-575c-4f83-a708-38507f6decb9&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false" frameborder="0" allowFullScreen="true"></iframe> -->
 
           
 
@@ -2547,267 +2677,369 @@ html_template = """
       animateCounter("top10Counter", 81.2);
       animateCounter("savdevCounter", 318.5);
 
-      // --- Chart 1: Fuel Consumption ---
-      new Chart(document.getElementById("fuelChart").getContext("2d"), {
-        type: "line",
-        data: {
-          labels: {{ fuel_data.months|tojson }},
-          datasets: [
-            {
-              label: "DEFIANCE",
-              data: {{ fuel_data.DEFIANCE|tojson }},
-              borderColor: "#2e7d32",
-              backgroundColor: "rgba(46,125,50,0.2)",
-              fill: true,
-              tension: 0.4,
-              borderWidth: 2
+      /* =========================================================
+      KPI’s 2025 — GLOBAL + VESSEL SPECIFIC (FINAL JS BLOCK)
+      ========================================================= */
+
+      // Helper: build chart only if canvas exists
+      function getCtx(id) {
+        const el = document.getElementById(id);
+        return el ? el.getContext("2d") : null;
+      }
+
+      // Common legend style (keep your design)
+      const legendBottomSmall = {
+        position: "bottom",
+        labels: { font: { size: 11 }, boxWidth: 14, padding: 12 }
+      };
+
+/* =========================================================
+   =============== GLOBAL 2025 — DATA =======================
+   ========================================================= */
+      const tfc2025 = {{ tfc_2025_global|tojson }};
+      const mean2025 = {{ tfc_2025_mean|tojson }};
+      const goal2025 = {{ tfc_2025_goal|tojson }};
+
+/* =========================================================
+   =============== GLOBAL 2025 — CHARTS =====================
+   ========================================================= */
+
+      // (G1) Total Consumption – Month (2025)
+      {
+        const ctx = getCtx("tfcMonth2025Chart");
+        if (ctx) {
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: tfc2025.months,
+              datasets: [
+                {
+                  label: "TFC (Month)",
+                  data: tfc2025.values,
+            borderColor: "#6b6f76",
+            backgroundColor: "rgba(107,111,118,0.12)",
+            fill: true,
+            tension: 0.25,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 5
+                }
+              ]
             },
-            {
-              label: "PRINCIPLE",
-              data: {{ fuel_data.PRINCIPLE|tojson }},
-              borderColor: "#6a1b9a",
-              fill: false,
-              tension: 0.4,
-              borderWidth: 2
-            },
-            {
-              label: "PRIME",
-              data: {{ fuel_data.PRIME|tojson }},
-              borderColor: "#1565c0",
-              fill: false,
-              tension: 0.4,
-              borderWidth: 2
-            },
-            {
-              label: "PRELUDE",
-              data: {{ fuel_data.PRELUDE|tojson }},
-              borderColor: "#ef6c00",
-              fill: false,
-              tension: 0.4,
-              borderWidth: 2
+            options: {
+              responsive: true,
+              plugins: { legend: legendBottomSmall }
             }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",   //  legend below chart
-              labels: {
-                font: {
-                  size: 11   //  reduce font size (default ~12 13)
+          });
+        }
+      }
+
+      // (G2) Mean vs Mean Goal (2025)
+      {
+        const ctx = getCtx("tfcMeanGoal2025Chart");
+        if (ctx) {
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: tfc2025.months,
+              datasets: [
+                {
+            label: "Mean TFC",
+            data: new Array(tfc2025.months.length).fill(mean2025),
+            borderColor: "#2e7d32",
+            backgroundColor: "rgba(46,125,50,0.15)",
+            tension: 0.0,
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0
                 },
-                boxWidth: 14,   // make legend markers smaller
-                padding: 12     // adjust spacing between items
+                {
+            label: "Mean TFC Goal",
+            data: new Array(tfc2025.months.length).fill(goal2025),
+            borderColor: "#6a1b9a",
+            borderDash: [6, 6],
+            tension: 0.0,
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: legendBottomSmall }
+            }
+          });
+        }
+      }
+
+      // (G3) Charter accountable for fuel (81/19)
+      {
+      const ctx = getCtx("charterPieChart");
+         if (ctx) {
+          new Chart(ctx, {
+            type: "doughnut",
+            data: {
+        labels: ["Accountable", "Non-accountable"],
+        datasets: [
+          {
+            data: [81, 19],
+            backgroundColor: ["#244a9b", "#c9ced6"],
+            borderWidth: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        cutout: "65%",
+        plugins: {
+          legend: {
+            position: "right",
+            labels: { font: { size: 11 }, boxWidth: 14, padding: 12 }
+                }
               }
             }
-          }
+          });
         }
-      });
+      }
 
-      // --- Chart 2: Average vs Goal ---
-      new Chart(document.getElementById("goalChart").getContext("2d"), {
-        type: "line",
-        data: {
-          labels: {{ goal_data.months|tojson }},
-          datasets: [
-            {
-              label: "Average",
-              data: {{ goal_data.AVERAGE|tojson }},
-              borderColor: "#2e7d32",
-              backgroundColor: "rgba(46,125,50,0.15)",
-              tension: 0.4,
-              borderWidth: 2,
-              fill: false
-            },
-            {
-              label: "Goal",
-              data: {{ goal_data.GOAL|tojson }},
-              borderColor: "#6a1b9a",
-              borderDash: [6,6],  // dashed line
-              tension: 0.4,
-              borderWidth: 2,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",   //  legend below chart
-              labels: {
-                font: {
-                  size: 11   //  reduce font size (default ~12 13)
-                },
-                boxWidth: 14,   // make legend markers smaller
-                padding: 12     // adjust spacing between items
-              }
-            }
-          }
-        }
-
-      });
-
-      // --- Chart 3: Oil and PPm ---
-      new Chart(document.getElementById("oilChart").getContext("2d"), {
-        type: "line",
-        data: {
-          labels: {{ oil_data.weeks|tojson }},
-          datasets: [
-            {
-              label: "OIL_WATER",
-              data: {{ oil_data.OIL_WATER|tojson }},
-              borderColor: "#2e7d32",
-              backgroundColor: "rgba(46,125,50,0.15)",
-              tension: 0.4,
-              borderWidth: 2,
-              fill: false
-            },
-            {
-              label: "PPM_2um",
-              data: {{ oil_data.PPM_2um|tojson }},
-              borderColor: "#6a1b9a",
-              borderDash: [6,6],  // dashed line
-              tension: 0.4,
-              borderWidth: 2,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",   //  legend below chart
-              labels: {
-                font: {
-                  size: 11   //  reduce font size (default ~12 13)
-                },
-                boxWidth: 14,   // make legend markers smaller
-                padding: 12     // adjust spacing between items
-              }
-            }
-          }
-        }
-
-      });
-
-      // --- Chart 4: conductivity ---
-      new Chart(document.getElementById("condChart").getContext("2d"), {
-        type: "line",
-        data: {
-          labels: {{ cw_data.weeks|tojson }},
-          datasets: [
-            {
-              label: "CONDUCTIVITY",
-              data: {{ cw_data.CONDUCTIVITY|tojson }},
-              borderColor: "#2e7d32",
-              backgroundColor: "rgba(46,125,50,0.2)",
-              tension: 0.4,
-              borderWidth: 2,
-              fill: true
-            },
-            {
-              label: "Goal",
-              data: {{ cw_data.GOAL|tojson }},
-              borderColor: "#6a1b9a",
-              borderDash: [6,6],  // dashed line
-              tension: 0.4,
-              borderWidth: 2,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",   //  legend below chart
-              labels: {
-                font: {
-                  size: 11   //  reduce font size (default ~12 13)
-                },
-                boxWidth: 14,   // make legend markers smaller
-                padding: 12     // adjust spacing between items
-              }
-            }
-          }
-        }
-
-      });
-
-      // --- Chart 5: Top 10 Vessels Savings (Bar) ---
-      new Chart(document.getElementById("vesselChart").getContext("2d"), {
-        type: "bar",
-        data: {
-          labels: {{ vessels10["names"] |tojson }},
-          datasets: [{
-            label: "Savings",
-            data: {{ vessels10["values"] |tojson }},
-            backgroundColor: "rgba(46,125,50,0.7)",   // green
+      // (G4) LED – CO₂ savings (2025): simple bar chart
+      {
+        const ctx = getCtx("ledChart");
+        if (ctx) {
+          new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["LED"],
+        datasets: [
+          {
+            label: "tCO₂",
+            data: [15000],
+            backgroundColor: "rgba(46,125,50,0.7)",
             borderColor: "#2e7d32",
             borderWidth: 1,
             borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: {
-              ticks: { font: { size: 11 } },
-              grid: { color: "rgba(0,0,0,0.05)" }
-            },
-            y: {
-              ticks: { font: { size: 11 } },
-              grid: { color: "rgba(0,0,0,0.05)" }
-            }
           }
-        }
-      });
-
-      // --- Chart 6: Savings by Device (Donut) ---
-      new Chart(document.getElementById("deviceChart").getContext("2d"), {
-        type: "bar",
-        data: {
-          labels: {{ donutdev["labels"] |tojson }},
-          datasets: [{
-            data: {{ donutdev["values"] |tojson }},
-            backgroundColor: [
-              "rgba(106,27,154,0.7)",  // violet
-              "rgba(142,36,170,0.7)",  // violet clair
-              "rgba(46,125,50,0.7)",   // vert foncé
-              "rgba(76,175,80,0.7)",   // vert clair
-              "rgba(0,150,136,0.7)",   // teal
-              "rgba(129,199,132,0.7)"  // vert pastel
-            ],
-            borderColor: "#fff",
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: {
-              ticks: { font: { size: 11 } },
-              grid: { color: "rgba(0,0,0,0.05)" }
-            },
-            y: {
-              ticks: { font: { size: 11 } },
-              grid: { color: "rgba(0,0,0,0.05)" }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: "rgba(0,0,0,0.05)" } }
+              }
             }
-          }
+          });
         }
+      }
 
-      });
+      /* =========================================================
+   ============ VESSEL SPECIFIC — CHARTS ====================
+   ========================================================= */
+
+      // (VS1) TFC by Vessel (reuse your existing fuel_data)
+      {
+        const ctx = getCtx("tfcVesselChart");
+        if (ctx) {
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: {{ fuel_data.months|tojson }},
+        datasets: [
+          {
+            label: "DEFIANCE",
+            data: {{ fuel_data.DEFIANCE|tojson }},
+            borderColor: "#2e7d32",
+            backgroundColor: "rgba(46,125,50,0.2)",
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2
+          },
+          {
+            label: "PRINCIPLE",
+            data: {{ fuel_data.PRINCIPLE|tojson }},
+            borderColor: "#6a1b9a",
+            fill: false,
+            tension: 0.4,
+            borderWidth: 2
+          },
+          {
+            label: "PRIME",
+            data: {{ fuel_data.PRIME|tojson }},
+            borderColor: "#1565c0",
+            fill: false,
+            tension: 0.4,
+            borderWidth: 2
+          },
+          {
+            label: "PRELUDE",
+            data: {{ fuel_data.PRELUDE|tojson }},
+            borderColor: "#ef6c00",
+            fill: false,
+            tension: 0.4,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: legendBottomSmall }
+            }
+          });
+        }
+      }
+
+      // (VS2/VS3) Deviation Factor charts (Prime & Principle)
+      // NOTE: category-like x-axis without time adapter (safe & works everywhere)
+      function makeDeviationChart(canvasId, devData, lineColor) {
+        const ctx = getCtx(canvasId);
+        if (!ctx) return;
+
+        // devData expected: { dates:[...], values:[...] }
+        const n = devData.values.length;
+
+        new Chart(ctx, {
+          data: {
+            labels: devData.dates,
+            datasets: [
+        {
+          type: "scatter",
+          label: "Deviation factor",
+          data: devData.values.map((y, i) => ({ x: i, y })),
+          backgroundColor: "rgba(90,160,210,0.55)",
+          borderColor: "rgba(90,160,210,0.55)",
+          pointRadius: 4,
+          pointHoverRadius: 5
+        },
+        {
+          type: "line",
+          label: "Smoothed deviation factor",
+          data: devData.values,
+          borderColor: lineColor,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.15
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: legendBottomSmall },
+      scales: {
+        x: {
+          type: "linear",
+          min: 0,
+          max: n - 1,
+          ticks: {
+            // show one label every ~3 points (reduce clutter)
+            callback: (val) => {
+              const i = Math.round(val);
+              if (!devData.dates[i]) return "";
+              return (i % 3 === 0) ? devData.dates[i].slice(0, 7) : "";
+            }
+          },
+          grid: { display: false }
+        },
+        y: { grid: { color: "rgba(0,0,0,0.05)" } }
+      }
+    }
+  });
+      }
+
+      {
+        const primeDev = {{ prime_dev_factor|tojson }};
+        const principleDev = {{ principle_dev_factor|tojson }};
+
+        makeDeviationChart("primeDeviationChart", primeDev, "#c01f3a");
+        makeDeviationChart("principleDeviationChart", principleDev, "#c01f3a");
+      }
+
+/* =========================================================
+   ============ KEEP EXISTING — CJC / IWTM ===================
+   ========================================================= */
+
+      // (KEEP) Chart: Oil & PPM (CJC)
+      {
+  const ctx = getCtx("oilChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: {{ oil_data.weeks|tojson }},
+        datasets: [
+          {
+            label: "OIL_WATER",
+            data: {{ oil_data.OIL_WATER|tojson }},
+            borderColor: "#2e7d32",
+            backgroundColor: "rgba(46,125,50,0.15)",
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          },
+          {
+            label: "PPM_2um",
+            data: {{ oil_data.PPM_2um|tojson }},
+            borderColor: "#6a1b9a",
+            borderDash: [6,6],
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: legendBottomSmall }
+      }
     });
+  }
+}
+
+// (KEEP) Chart: Conductivity (IWTM)
+{
+  const ctx = getCtx("condChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: {{ cw_data.weeks|tojson }},
+        datasets: [
+          {
+            label: "CONDUCTIVITY",
+            data: {{ cw_data.CONDUCTIVITY|tojson }},
+            borderColor: "#2e7d32",
+            backgroundColor: "rgba(46,125,50,0.2)",
+            tension: 0.4,
+            borderWidth: 2,
+            fill: true
+          },
+          {
+            label: "Goal",
+            data: {{ cw_data.GOAL|tojson }},
+            borderColor: "#6a1b9a",
+            borderDash: [6,6],
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: legendBottomSmall }
+      }
+    });
+  }
+}
+      });
+
+/* =========================================================
+   NOTE: You should REMOVE old charts for:
+   - fuelChart, goalChart, vesselChart, deviceChart
+   because these canvases no longer exist in the new HTML.
+   ========================================================= */
+
    
 
     </script>
@@ -2848,6 +3080,17 @@ def index():
         kpis_section=kpis_section, #to not forget
 
         #value for charts
+        
+        kpis_global_2025=kpis_global_2025,
+        tfc_2025_global=tfc_2025_global,
+        tfc_2025_mean=tfc_2025_mean,
+        tfc_2025_goal=tfc_2025_goal,
+        fuel_charter_accountable=fuel_charter_accountable,
+        avg_vessels_in_operation_2025=avg_vessels_in_operation_2025,
+        led_co2_savings_2025=led_co2_savings_2025,
+        kpi_titles=kpi_titles,
+        prime_dev_factor=prime_dev_factor,
+        principle_dev_factor=principle_dev_factor,
         fuel_data=fuel_data,
         goal_data=goal_data,
         fuel_latest=fuel_latest,
