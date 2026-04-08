@@ -1368,16 +1368,6 @@ header {
                 element.classList.add('hidden');
             }
         }
-
-        function loadPowerBIReport() {
-           document.getElementById("analyticsContainer").innerHTML = `
-           <iframe title="SustainaBOS7" width="950" height="1250"
-        src="https://app.powerbi.com/reportEmbed?reportId=19eea1f2-00f5-4fcf-8d6d-6bed6f27d0e5&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false"
-           frameborder="0" allowFullScreen="true">
-           </iframe>
-    `      ;
-        }
-
         
 function setActiveNav(sectionId) {
   const navItems = document.querySelectorAll('a[id^="nav-"]');
@@ -1446,13 +1436,7 @@ function showSection(sectionId) {
       setTimeout(() => { box.style.opacity = '0'; }, 3000);
     }
   }
-
-  // PowerBI only when analytics
-  if (sectionId === 'analytics') {
-    loadPowerBIReport();
-  }
 }
-
 
 /**
  * Generic dropdown handler (KPI now, other dropdowns later)
