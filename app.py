@@ -518,7 +518,7 @@ html_template = """
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #E8F5E9; margin: 0; padding: 0; }
-        .container { width: 80%; margin: auto; overflow: visible; }
+        .container { width: 80%; margin: auto; overflow: hidden; }
         header { background: #D0E8D0; color: #800080; padding-top: 20px; min-height: auto; border-bottom: #800080 2px solid; }
         header a { color: #800080; text-decoration: none; text-transform: none; font-size: 16px; font-weight: bold;}
         header ul { padding: 0; list-style: none; }
@@ -534,7 +534,7 @@ html_template = """
         th { background-color: #0779e4; color: white; }
         h2 { color: #333; }
         .hidden { display: none; }
-        .show { display: block; }
+        .show { display: table-row-group; }
         
         table {
         width: 100%;
@@ -583,7 +583,7 @@ html_template = """
            display: flex;
            justify-content: center;
            align-items: center;
-           z-index: 2000;
+           z-index: 10000;
            transition: transform 0.3s ease;
            animation: glow 1.5s ease-in-out infinite alternate;
            }
@@ -608,7 +608,7 @@ html_template = """
           opacity: 0;
           transform: translateY(20px);
           transition: opacity 0.3s, transform 0.3s;
-          z-index: 2000;
+          z-index: 999;
         }
 
         #fab-menu.show {
@@ -638,7 +638,7 @@ html_template = """
           padding: 6px 12px;
           border-radius: 12px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          z-index: 2000;
+          z-index: 10000;
           transition: transform 0.2s ease, background 0.2s ease;
         }
 
@@ -659,7 +659,7 @@ html_template = """
            flex-direction: column;
            justify-content: center;
            align-items: center;
-           z-index: 3000;
+           z-index: 9999;
            animation: fadeOut 1s ease 1 forwards;
            animation-delay: 1.5s;
         }
@@ -751,7 +751,7 @@ html_template = """
       background:#eaffea; /* Light light green */
       border-bottom: 1px solid var(--border);
       color: var(--ink);
-      position: sticky; top: 0; z-index: 100;
+      position: sticky; top: 0; z-index: 1000;
       box-shadow: 0 6px 20px rgba(0,0,0,.06);
      }
 
@@ -1173,7 +1173,7 @@ html_template = """
         display: flex;
         flex-direction: column;
         /* overflow: hidden; to remove for moment as it's compromising input bar */
-        z-index: 2000;  /* on top of everything */
+        z-index: 99999;  /* on top of everything */
         transition: transform .2s ease, opacity .2s ease;
       }
 
@@ -1248,114 +1248,6 @@ html_template = """
          background: var(--brand-green);
       }
 
-
-/* ===============================
-   NAV DROPDOWN — STABLE VERSION
-   =============================== */
-
-
-
-/* main nav layout stays intact */
-header nav ul {
-  display: flex;
-  align-items: center;
-}
-
-/* dropdown parent */
-header nav ul li.nav-dropdown {
-  position: relative;
-}
-
-/* KPIs link (same look as others) */
-header nav ul li.nav-dropdown > a {
-  font-family: inherit;
-  font-weight: bold;
-  font-size: 16px;
-  color: #5b2b82;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* dropdown menu — REMOVE from nav flow */
-header nav ul li.nav-dropdown > ul.nav-dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-
-  /* ✅ reset inherited nav styles */
-  flex-direction: column;
-  align-items: stretch;
-
-  background: #e9fbe8;
-  border-radius: 8px;
-
-  padding: 6px 0;
-  margin: 0;
-  list-style: none;
-  min-width: 190px;
-
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  z-index: 500;
-}
-
-/* show on hover */
-header nav ul li.nav-dropdown:hover > ul.nav-dropdown-menu {
-  display: block;
-}
-
-/* dropdown items */
-header nav ul li.nav-dropdown > ul.nav-dropdown-menu li {
-  width: 100%;
-}
-
-/* dropdown links */
-header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a {
-  display: block;
-  padding: 8px 16px;
-
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2e7d32;
-
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a:hover {
-  background: rgba(46,125,50,0.12);
-}
-
-
-header nav ul li a.active-nav {
-  font-size: 1.15em;
-}
-
-
-
-/* ✅ Allow dropdowns to overflow header */
-header,
-header .container,
-header nav,
-header nav ul {
-  overflow: visible !important;
-}
-
-
-
-.kpi-subsection.hidden {
-       display: none;
-                  }
-
-
-.hidden {
-  display: none !important;
-}
-
-
-
-
          
     </style>
     <script>
@@ -1369,107 +1261,84 @@ header nav ul {
                 element.classList.add('hidden');
             }
         }
-        
-function setActiveNav(sectionId) {
-  const navItems = document.querySelectorAll('a[id^="nav-"]');
 
-  // remove active + remove leaf from all
-  navItems.forEach(item => {
-    item.classList.remove('active-nav');
-    const icon = item.querySelector('img.nav-leaf');
-    if (icon) icon.remove();
-  });
+        function loadPowerBIReport() {
+           document.getElementById("analyticsContainer").innerHTML = `
+           <iframe title="SustainaBOS7" width="950" height="1250"
+        src="https://app.powerbi.com/reportEmbed?reportId=19eea1f2-00f5-4fcf-8d6d-6bed6f27d0e5&autoAuth=true&ctid=0bb4d87c-b9a5-49c3-8a59-4347acef01d8&navContentPaneEnabled=false&filterPaneEnabled=false"
+           frameborder="0" allowFullScreen="true">
+           </iframe>
+    `      ;
+        }
 
-  const activeNav = document.getElementById('nav-' + sectionId);
-  if (!activeNav) return;
+        function showSection(sectionId) {
+            var sections = document.getElementsByClassName('section');
+            var navItems = document.querySelectorAll('a[id^="nav-"]');  
+            // selects all nav items by id
+            console.log("Sections found:", sections);
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].style.display = 'none';
+            }
 
-  activeNav.classList.add('active-nav');
+            // Remove highlight from all nav items
+                navItems.forEach(item => {
+        item.classList.remove('active-nav');
+                // Optional: remove any icons previously added
+                var icon = item.querySelector('img');
+                if (icon) item.removeChild(icon);
+            });
 
-  // add leaf icon
-  const leaf = document.createElement('img');
-  leaf.className = 'nav-leaf';
-  leaf.src = '/static/green_leaf.png';
-  leaf.alt = 'leaf';
-  leaf.style.height = '16px';
-  leaf.style.marginLeft = '5px';
-  activeNav.appendChild(leaf);
-}
+            // Show the selected section
+            var selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                   selectedSection.style.display = 'block';
+            }
 
+            // Sinon : document.getElementById(sectionId).style.display = 'block';
 
+            // Show instructions if it's the 'list' or 'contact' section
+            if (sectionId === 'list') {
+                  const box = document.getElementById('instruction-box');
+                  if (box) {
+                     box.style.display = 'block';
+                     box.style.opacity = '1';
+                     box.style.transition = 'opacity 1s ease';
+                     setTimeout(() => {
+                        box.style.opacity = '0';
+                     }, 3000); // Fade out after 3 seconds
+                  }
+            }
+            if (sectionId === 'contact') {
+                  const box = document.getElementById('instruction-box-nul');
+                  if (box) {
+                     box.style.display = 'block';
+                     box.style.opacity = '1';
+                     box.style.transition = 'opacity 1s ease';
+                     setTimeout(() => {
+                        box.style.opacity = '0';
+                     }, 3000); // Fade out after 3 seconds
+                  }
+            }
 
-function showSection(sectionId) {
-  const sections = document.getElementsByClassName('section');
-  console.log("Sections found:", sections);
+            // 👉 Add Power BI iframe only when user navigates to analytics
+            if (sectionId === 'analytics') {
+                loadPowerBIReport();
+            }
 
-  // hide all sections (use ONE system: .hidden)
-  for (let i = 0; i < sections.length; i++) {
-    sections[i].classList.add('hidden');
-    sections[i].style.display = ''; // clear any old inline display
-  }
+            // Add highlight or icon to active section
+            var activeNav = document.getElementById('nav-' + sectionId);
+            activeNav.classList.add('active-nav');
 
-  // show selected section
-  const selectedSection = document.getElementById(sectionId);
-  if (selectedSection) {
-    selectedSection.classList.remove('hidden');
-    selectedSection.style.display = ''; // ensure no inline conflicts
-  }
-
-  // highlight main nav + leaf (single source of truth)
-  setActiveNav(sectionId);
-
-  // optional: instruction boxes (keep your behavior)
-  if (sectionId === 'list') {
-    const box = document.getElementById('instruction-box');
-    if (box) {
-      box.style.display = 'block';
-      box.style.opacity = '1';
-      box.style.transition = 'opacity 1s ease';
-      setTimeout(() => { box.style.opacity = '0'; }, 3000);
-    }
-  }
-
-  if (sectionId === 'contact') {
-    const box = document.getElementById('instruction-box-nul');
-    if (box) {
-      box.style.display = 'block';
-      box.style.opacity = '1';
-      box.style.transition = 'opacity 1s ease';
-      setTimeout(() => { box.style.opacity = '0'; }, 3000);
-    }
-  }
-}
-
-/**
- * Generic dropdown handler (KPI now, other dropdowns later)
- * parentSectionId: the main section to show (ex: "analytics")
- * subSelector: CSS selector for all subsections inside that section (ex: ".kpi-subsection")
- * subId: the specific subsection id to show (ex: "kpi-vessel")
- */
-
-function showSubSection(parentSectionId, subSelector, subId) {
-  // 1) ensure main section visible + active nav correct
-  showSection(parentSectionId);
-
-  // ✅ force parent visible (no inline display leftovers)
-  const parent = document.getElementById(parentSectionId);
-  if (parent) parent.classList.remove('hidden');
-
-  // 2) hide all subsections
-  document.querySelectorAll(subSelector).forEach(sec => sec.classList.add('hidden'));
-
-  // 3) show requested subsection
-  const target = document.getElementById(subId);
-  if (target) target.classList.remove('hidden');
-}
+            // Add green_leaf icon
+            let leaf = document.createElement('img');
+            leaf.src = '/static/green_leaf.png';  // adjust path if needed
+            leaf.alt = 'leaf';
+            leaf.style.height = '16px';
+            leaf.style.marginLeft = '5px';
+            activeNav.appendChild(leaf);
 
 
-// ✅ KPI dropdown uses generic function
-function showKpiSub(subId) {
-  showSubSection('analytics', '.kpi-subsection', subId);
-}
-
-
-        
+        }
 
         function addDevice() {
         console.log("Add Device button clicked");
@@ -1733,23 +1602,7 @@ function showKpiSub(subId) {
             <li><a id="nav-welcome" href="#" onclick="showSection('welcome')">Home</a></li>
             <li><a id="nav-list" href="#" onclick="showSection('list')">List</a></li>
             <li><a id="nav-apps" href="#" onclick="showSection('apps')">Apps</a></li>
-                             
-            
-                             <li class="nav-dropdown">
-                                   
-                            <a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a>
-
-                             <ul class="nav-dropdown-menu">
-                                  <li><a href="#" onclick="showKpiSub('kpi-global')">Global</a></li>
-                                  <li><a href="#" onclick="showKpiSub('kpi-vessel')">Vessel specific</a></li>
-                                  <li><a href="#" onclick="showKpiSub('kpi-compare')">2024 vs 2025</a></li>
-                                  <li><a href="#" onclick="showKpiSub('kpi-old')">Old analytics</a></li>
-                                  </ul>
-                              </li>
-
-
-
-
+            <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a></li>
             <li><a id="nav-report" href="#" onclick="showSection('report')">Docs</a></li>
             <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
             <li style="margin-left:auto;">
@@ -2283,8 +2136,6 @@ function showKpiSub(subId) {
         <!-- ================= KPI’s 2025 — GLOBAL =================== -->
         <!-- ========================================================= -->
 
-        <div id="kpi-global" class="kpi-subsection">
-
         <h2 style="margin-bottom:15px;">KPI’s 2025 — GLOBAL</h2>
 
         <div class="kpi-grid">
@@ -2386,13 +2237,10 @@ function showKpiSub(subId) {
         </div>
 
       </div>
-      </div>
 
       <!-- ========================================================= -->
       <!-- ============ KPI’s 2025 — VESSEL SPECIFIC =============== -->
       <!-- ========================================================= -->
-
-      <div id="kpi-vessel" class="kpi-subsection hidden">
 
       <h2 style="margin:30px 0 15px;">KPI’s 2025 — VESSEL SPECIFIC</h2>
 
@@ -2420,13 +2268,8 @@ function showKpiSub(subId) {
         </div>
 
       </div>
-      </div>
-
-      <div id="kpi-compare" class="kpi-subsection hidden">
-      </div>
 
           
-      <div id="kpi-old" class="kpi-subsection hidden">
 
           <br>
           <br>
@@ -2491,8 +2334,6 @@ function showKpiSub(subId) {
              <img src="{{ url_for('static', filename='OJ_worstEX2.png') }}" alt="Track" width="450">
 
           </div>
-          </div>
-
 
 
 
