@@ -1248,6 +1248,56 @@ html_template = """
          background: var(--brand-green);
       }
 
+      /* ===============================
+              Generic nav dropdown component
+   =============================== */
+
+              .nav-dropdown {
+              position: relative;
+              }
+
+              .nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ffffff;
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  min-width: 200px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+              .nav-dropdown-menu li {
+  padding: 6px 16px;
+}
+
+              .nav-dropdown-menu li a {
+  display: block;
+  text-decoration: none;
+  color: #333;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+              .nav-dropdown-menu li a:hover {
+  background: rgba(46,125,50,0.08);
+}
+
+/* ✅ Hover logic (no JS) */
+              .nav-dropdown:hover .nav-dropdown-menu {
+  display: block;
+          }
+
+          
+              .kpi-subsection.hidden {
+                      display: none;
+                  }
+
+
+
          
     </style>
     <script>
@@ -1336,9 +1386,26 @@ html_template = """
             leaf.style.height = '16px';
             leaf.style.marginLeft = '5px';
             activeNav.appendChild(leaf);
-
+        
 
         }
+        
+        function showKpiSub(id) {
+                      // 1) afficher la page KPI
+                      showSection("analytics");
+
+                      // 2) cacher toutes les sous-sections KPI
+                      document.querySelectorAll(".kpi-subsection").forEach(sec => {
+                           sec.classList.add("hidden");
+                          });
+
+                      // 3) afficher la bonne
+                      const target = document.getElementById(id);
+                      if (target) target.classList.remove("hidden");
+                     }
+
+
+        
 
         function addDevice() {
         console.log("Add Device button clicked");
@@ -1602,7 +1669,34 @@ html_template = """
             <li><a id="nav-welcome" href="#" onclick="showSection('welcome')">Home</a></li>
             <li><a id="nav-list" href="#" onclick="showSection('list')">List</a></li>
             <li><a id="nav-apps" href="#" onclick="showSection('apps')">Apps</a></li>
-            <li><a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a></li>
+
+            
+                             
+                             <li class="nav-dropdown">
+                              #
+                              KPIs ▾
+                              </a>
+
+                              <ul class="nav-dropdown-menu">
+                               
+                              <li>
+                              <a href="#" onclick="showKpiSub('kpi-global')">Global</a>
+                              </li>
+                              <li>
+                              <a href="#" onclick="showKpiSub('kpi-vessel')">Vessel specific</a>
+                              </li>
+                               <li>
+                               <a href="#" onclick="showKpiSub('kpi-compare')">2024 vs 2025</a>
+                                </li>
+                               <li>
+                               <a href="#" onclick="showKpiSub('kpi-old')">Old analytics</a>
+                               </li>
+
+                               </ul>
+                                </li>
+
+
+
             <li><a id="nav-report" href="#" onclick="showSection('report')">Docs</a></li>
             <li><a id="nav-contact" href="#" onclick="showSection('contact')">Contact</a></li>
             <li style="margin-left:auto;">
@@ -2136,6 +2230,8 @@ html_template = """
         <!-- ================= KPI’s 2025 — GLOBAL =================== -->
         <!-- ========================================================= -->
 
+        <div id="kpi-global" class="kpi-subsection">
+
         <h2 style="margin-bottom:15px;">KPI’s 2025 — GLOBAL</h2>
 
         <div class="kpi-grid">
@@ -2237,10 +2333,13 @@ html_template = """
         </div>
 
       </div>
+      </div>
 
       <!-- ========================================================= -->
       <!-- ============ KPI’s 2025 — VESSEL SPECIFIC =============== -->
       <!-- ========================================================= -->
+
+      <div id="kpi-vessel" class="kpi-subsection hidden">
 
       <h2 style="margin:30px 0 15px;">KPI’s 2025 — VESSEL SPECIFIC</h2>
 
@@ -2268,8 +2367,13 @@ html_template = """
         </div>
 
       </div>
+      </div>
+
+      <div id="kpi-vessel" class="kpi-subsection hidden">
+      </div>
 
           
+      <div id="kpi-vessel" class="kpi-subsection hidden">
 
           <br>
           <br>
@@ -2334,6 +2438,8 @@ html_template = """
              <img src="{{ url_for('static', filename='OJ_worstEX2.png') }}" alt="Track" width="450">
 
           </div>
+          </div>
+
 
 
 
@@ -2837,7 +2943,7 @@ html_template = """
     new Chart(ctx, {
       type: "bar",
       data: {
-        labels: ["Charter accountable", "Non-accountable"],
+        labels: ["Non-accountable", "Charter accountable"],
         datasets: [{
           data: [22356, 95390],
           backgroundColor: [
