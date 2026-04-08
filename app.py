@@ -1326,6 +1326,21 @@ header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a:hover {
 }
 
 
+/* ✅ Allow dropdowns to overflow header */
+header,
+header .container,
+header nav,
+header nav ul {
+  overflow: visible !important;
+}
+
+header {
+  position: relative;
+  z-index: 50;
+}
+
+
+
           
               .kpi-subsection.hidden {
                       display: none;
@@ -1707,17 +1722,16 @@ header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a:hover {
                              
             
                              <li class="nav-dropdown">
-                                   <a href="#" onclick="showSection('analytics')">
-                                  KPIs
-                                   </a>
+                                   
+                            <a id="nav-analytics" href="#" onclick="showSection('analytics')">KPIs</a>
 
-                                  <ul class="nav-dropdown-menu">
+                             <ul class="nav-dropdown-menu">
                                   <li><a href="#" onclick="showKpiSub('kpi-global')">Global</a></li>
                                   <li><a href="#" onclick="showKpiSub('kpi-vessel')">Vessel specific</a></li>
                                   <li><a href="#" onclick="showKpiSub('kpi-compare')">2024 vs 2025</a></li>
                                   <li><a href="#" onclick="showKpiSub('kpi-old')">Old analytics</a></li>
                                   </ul>
-                               </li>
+                              </li>
 
 
 
