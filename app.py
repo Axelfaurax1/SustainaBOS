@@ -417,12 +417,21 @@ tfc_2025_global = {
     "year": 2025,
     "months": ["January","February","March","April","May","June","July","August","September","October","November","December"],
     # Estimated from your screenshot (Total Consumption - Month)
-    "values": [8000, 7400, 8600, 8600, 10700, 10300, 11400, 10600, 11200, 11800, 9600, 10000]
+    "values": [8000, 7400, 8600, 8600, 10700, 10300, 11400, 10600, 11200, 11800, 9600, 9570]
 }
 
-tfc_2025_mean = sum(tfc_2025_global["values"]) / len(tfc_2025_global["values"])
+tfc_2025_mean = sum(tfc_2025_global["values"]) / len(tfc_2025_global["values"])#
+tfc_2025_total = sum(tfc_2025_global["values"])
 # Keep same logic as your existing "Mean TFC Goal" style: set a goal slightly below mean (≈ -8%)
 tfc_2025_goal = round(tfc_2025_mean * 0.92, 0)
+
+co2_2025_global = {
+  "year": 2025,
+  "months": ["January","February","March","April","May","June","July","August","September","October","November","December"],
+  "values": [21415, 19941, 22816, 23005, 28573, 27556, 30677, 28511, 30100, 31800, 25697, 27180]
+}
+co2_2025_mean = sum(co2_2025_global["values"]) / len(co2_2025_global["values"])
+co2_2025_goal = round(co2_2025_mean * 0.8, 0)
 
 fuel_charter_accountable = {
     "labels": ["Accountable", "Non-accountable"],
@@ -433,8 +442,10 @@ avg_vessels_in_operation_2025 = 71  # From your request
 
 # KPI cards (GLOBAL 2025)
 kpis_global_2025 = [
-    {"title": "TFC 2025 (Global)", "value": kpi_tfc, "suffix": " t"},  # keep your existing TFC global KPI
-    {"title": "Avg. Vessels in Operation", "value": avg_vessels_in_operation_2025, "suffix": ""},
+    # keep your existing TFC global KPI here : {"title": "TFC 2025 (Global)", "value": kpi_tfc, "suffix": " t"},  
+    {"title": "CO₂e 2025 ", "value": 312160, "suffix": " tCO₂e"},
+          {"title":"Avg Daily CO₂ / vessel","value": round(312160/(365*avg_vessels_in_operation_2025),1), "suffix": " tCO₂e"},
+    #{"title": "Avg. Vessels in Operation", "value": avg_vessels_in_operation_2025, "suffix": ""},
     {"title": "Charter Fuel Accountable", "value": 81.0, "suffix": "%"}
 ]
 
@@ -2129,8 +2140,8 @@ html_template = """
 
         <div class="kpi-grid">
           <div class="kpi-simple-card">
-            <h3>TFC 2025 (Global)</h3>
-            <div class="kpi-simple-value">{{ kpi_tfc }} t</div>
+            <h3><h3>CO₂e 2025</h3></h3>
+            <div class="kpi-simple-value">312160 tCO₂e t</div>
           </div>
 
           <div class="kpi-simple-card">
@@ -2149,7 +2160,7 @@ html_template = """
 
         <div class="chart-card">
           <div class="chart-counter"
-               data-target="{{ tfc_2025_mean|round(0) }}"
+               data-target="117746"
                data-suffix=" m³">0</div>
           <div class="chart-subtitle">Total Consumption – Month (2025)</div>
           <canvas id="tfcMonth2025Chart"></canvas>
@@ -2159,14 +2170,14 @@ html_template = """
           <div style="display:flex; justify-content:space-around;">
             <div>
               <div class="chart-counter"
-                   data-target="{{ tfc_2025_mean|round(0) }}"
-                   data-suffix=" m³">0</div>
+                   data-target="{{ co2_2025_mean|round(0) }}"
+                   data-suffix=" t">0</div>
               <div class="chart-subtitle">Mean TFC</div>
             </div>
             <div>
               <div class="chart-counter"
-                   data-target="{{ tfc_2025_goal|round(0) }}"
-                   data-suffix=" m³">0</div>
+                   data-target="{{ co2_2025_goal|round(0) }}"
+                   data-suffix=" t">0</div>
               <div class="chart-subtitle">Mean TFC Goal</div>
             </div>
           </div>
@@ -2714,9 +2725,10 @@ html_template = """
 /* =========================================================
    =============== GLOBAL 2025 — DATA =======================
    ========================================================= */
-      const tfc2025 = {{ tfc_2025_global|tojson }};
-      const mean2025 = {{ tfc_2025_mean|tojson }};
-      const goal2025 = {{ tfc_2025_goal|tojson }};
+      const tfc2025 = {{ tfc_2025_global|tojson }};   // fuel (m³)
+      const co22025 = {{ co2_2025_global|tojson }};   // CO2 (tCO2e)
+      const co2Mean2025 = {{ co2_2025_mean|tojson }};
+      const co2Goal2025 = {{ co2_2025_goal|tojson }};
 
 /* =========================================================
    =============== GLOBAL 2025 — CHARTS =====================
@@ -2734,14 +2746,28 @@ html_template = """
                 {
                   label: "TFC (Month)",
                   data: tfc2025.values,
-            borderColor: "#6b6f76",
-            backgroundColor: "rgba(107,111,118,0.12)",
+            
+                  borderColor: "#2e7d32",
+                  backgroundColor: "rgba(46,125,50,0.12)",
+,
             fill: true,
             tension: 0.25,
             borderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 5
-                }
+                }, 
+            
+                                  {
+                                 label: "Fuel Goal (80%)",
+                                  data: tfc2025.values.map(v => v * 0.8),
+                                   borderColor: "#6a1b9a",
+                                     borderDash: [6,6],
+                                        tension: 0.25,
+                                         borderWidth: 2,
+                                          fill: false,
+                                           pointRadius: 0
+                                          }
+
               ]
             },
             options: {
@@ -2759,29 +2785,41 @@ html_template = """
           new Chart(ctx, {
             type: "line",
             data: {
-              labels: tfc2025.months,
-              datasets: [
-                {
-            label: "Mean TFC",
-            data: new Array(tfc2025.months.length).fill(mean2025),
-            borderColor: "#2e7d32",
-            backgroundColor: "rgba(46,125,50,0.15)",
-            tension: 0.0,
-            borderWidth: 2,
-            fill: false,
-            pointRadius: 0
-                },
-                {
-            label: "Mean TFC Goal",
-            data: new Array(tfc2025.months.length).fill(goal2025),
-            borderColor: "#6a1b9a",
-            borderDash: [6, 6],
-            tension: 0.0,
-            borderWidth: 2,
-            fill: false,
-            pointRadius: 0
-                }
-              ]
+              labels: co22025.months,
+              
+           datasets: [
+                          {
+                                label: "CO₂ (Month)",
+                               data: co22025.values,
+    borderColor: "#6a1b9a",
+    backgroundColor: "rgba(106,27,154,0.10)",
+    fill: true,
+    tension: 0.25,
+    borderWidth: 2,
+    pointRadius: 4
+  },
+  {
+    label: "Mean CO₂",
+    data: new Array(co22025.months.length).fill(co2Mean2025),
+    borderColor: "#2e7d32",
+    borderDash: [6,6],
+    tension: 0.0,
+    borderWidth: 2,
+    fill: false,
+    pointRadius: 0
+  },
+  {
+    label: "CO₂ Goal (80% mean)",
+    data: new Array(co22025.months.length).fill(co2Goal2025),
+    borderColor: "#6a1b9a",
+    borderDash: [2,6],
+    tension: 0.0,
+    borderWidth: 2,
+    fill: false,
+    pointRadius: 0
+  }
+]
+
             },
             options: {
               responsive: true,
@@ -3102,6 +3140,7 @@ def index():
         kpis_global_2025=kpis_global_2025,
         tfc_2025_global=tfc_2025_global,
         tfc_2025_mean=tfc_2025_mean,
+        tfc_2025_total=tfc_2025_total,
         tfc_2025_goal=tfc_2025_goal,
         fuel_charter_accountable=fuel_charter_accountable,
         kpi_tfc=kpi_tfc,
