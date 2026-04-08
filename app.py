@@ -583,7 +583,7 @@ html_template = """
            display: flex;
            justify-content: center;
            align-items: center;
-           z-index: 10000;
+           z-index: 2000;
            transition: transform 0.3s ease;
            animation: glow 1.5s ease-in-out infinite alternate;
            }
@@ -608,7 +608,7 @@ html_template = """
           opacity: 0;
           transform: translateY(20px);
           transition: opacity 0.3s, transform 0.3s;
-          z-index: 999;
+          z-index: 2000;
         }
 
         #fab-menu.show {
@@ -638,7 +638,7 @@ html_template = """
           padding: 6px 12px;
           border-radius: 12px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          z-index: 10000;
+          z-index: 2000;
           transition: transform 0.2s ease, background 0.2s ease;
         }
 
@@ -659,7 +659,7 @@ html_template = """
            flex-direction: column;
            justify-content: center;
            align-items: center;
-           z-index: 9999;
+           z-index: 3000;
            animation: fadeOut 1s ease 1 forwards;
            animation-delay: 1.5s;
         }
@@ -751,7 +751,7 @@ html_template = """
       background:#eaffea; /* Light light green */
       border-bottom: 1px solid var(--border);
       color: var(--ink);
-      position: sticky; top: 0; z-index: 1000;
+      position: sticky; top: 0; z-index: 100;
       box-shadow: 0 6px 20px rgba(0,0,0,.06);
      }
 
@@ -1173,7 +1173,7 @@ html_template = """
         display: flex;
         flex-direction: column;
         /* overflow: hidden; to remove for moment as it's compromising input bar */
-        z-index: 99999;  /* on top of everything */
+        z-index: 2000;  /* on top of everything */
         transition: transform .2s ease, opacity .2s ease;
       }
 
@@ -1296,7 +1296,7 @@ header nav ul li.nav-dropdown > ul.nav-dropdown-menu {
   min-width: 190px;
 
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  z-index: 9999;
+  z-index: 500;
 }
 
 /* show on hover */
@@ -1328,17 +1328,18 @@ header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a:hover {
 }
 
 
+header nav ul li a.active-nav {
+  font-size: 1.15em;
+}
+
+
+
 /* ✅ Allow dropdowns to overflow header */
 header,
 header .container,
 header nav,
 header nav ul {
   overflow: visible !important;
-}
-
-header {
-  position: relative;
-  z-index: 50;
 }
 
 
