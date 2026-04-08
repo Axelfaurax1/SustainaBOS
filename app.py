@@ -1269,8 +1269,8 @@ header nav ul li.nav-dropdown {
 /* KPIs link (same look as others) */
 header nav ul li.nav-dropdown > a {
   font-family: inherit;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: bold;
+  font-size: 16px;
   color: #5b2b82;
   display: inline-flex;
   align-items: center;
