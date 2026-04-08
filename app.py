@@ -1298,7 +1298,8 @@ html_template = """
   font-weight: 500;
   color: #2e7d32; /*  vert comme Home */
 
-  text-decoration: none;
+  text-decoration: none; 
+}
   
              .nav-dropdown-menu li a:hover {
   background: rgba(46,125,50,0.12);
