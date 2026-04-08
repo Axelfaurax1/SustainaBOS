@@ -2162,7 +2162,7 @@ html_template = """
           <div class="chart-counter"
                data-target="117746"
                data-suffix=" m³">0</div>
-          <div class="chart-subtitle">Total Consumption – Month (2025)</div>
+          <div class="chart-subtitle">Total Fuel Consumption (2025)</div>
           <canvas id="tfcMonth2025Chart"></canvas>
         </div>
 
@@ -2829,66 +2829,92 @@ html_template = """
         }
       }
 
-      // (G3) Charter accountable for fuel (81/19)
-      {
-      const ctx = getCtx("charterPieChart");
-         if (ctx) {
-          new Chart(ctx, {
-            type: "doughnut",
-            data: {
-        labels: ["Accountable", "Non-accountable"],
-        datasets: [
-          {
-            data: [81, 19],
-            backgroundColor: ["#244a9b", "#c9ced6"],
-            borderWidth: 0
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        cutout: "65%",
-        plugins: {
-          legend: {
-            position: "right",
-            labels: { font: { size: 11 }, boxWidth: 14, padding: 12 }
-                }
-              }
-            }
-          });
-        }
-      }
-
-      // (G4) LED – CO₂ savings (2025): simple bar chart
-      {
-        const ctx = getCtx("ledChart");
-        if (ctx) {
-          new Chart(ctx, {
+      
+// (G3) Charter fuel split — BAR (Accountable vs Non-accountable)
+{
+  const ctx = getCtx("charterPieChart");
+  if (ctx) {
+    new Chart(ctx, {
       type: "bar",
       data: {
-        labels: ["LED"],
-        datasets: [
-          {
-            label: "tCO₂",
-            data: [15000],
-            backgroundColor: "rgba(46,125,50,0.7)",
-            borderColor: "#2e7d32",
-            borderWidth: 1,
-            borderRadius: 6
-          }
-        ]
+        labels: ["Charter accountable", "Non-accountable"],
+        datasets: [{
+          data: [22356, 95390],
+          backgroundColor: [
+            "rgba(46,125,50,0.7)",   // green
+            "rgba(106,27,154,0.7)"   // purple
+          ],
+          borderColor: "#fff",
+          borderWidth: 1,
+          borderRadius: 6
+        }]
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false }
+        },
         scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: "rgba(0,0,0,0.05)" } }
-              }
-            }
-          });
+          x: {
+            ticks: { font: { size: 11 } },
+            grid: { color: "rgba(0,0,0,0.05)" }
+          },
+          y: {
+            ticks: {
+              font: { size: 11 },
+              callback: (v) => v.toLocaleString()
+            },
+            grid: { color: "rgba(0,0,0,0.05)" }
+          }
         }
       }
+    });
+  }
+}
+
+
+      // (G4) Initiatives savings — same look as previous deviceChart (but shown in ledChart card)
+{
+  const ctx = getCtx("ledChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: {{ donutdev["labels"] |tojson }},
+        datasets: [{
+          data: {{ donutdev["values"] |tojson }},
+          backgroundColor: [
+            "rgba(106,27,154,0.7)",  // violet
+            "rgba(142,36,170,0.7)",  // violet clair
+            "rgba(46,125,50,0.7)",   // vert foncé
+            "rgba(76,175,80,0.7)",   // vert clair
+            "rgba(0,150,136,0.7)",   // teal
+            "rgba(129,199,132,0.7)"  // vert pastel
+          ],
+          borderColor: "#fff",
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: { font: { size: 11 } },
+            grid: { color: "rgba(0,0,0,0.05)" }
+          },
+          y: {
+            ticks: { font: { size: 11 } },
+            grid: { color: "rgba(0,0,0,0.05)" }
+          }
+        }
+      }
+    });
+  }
+}
 
       /* =========================================================
    ============ VESSEL SPECIFIC — CHARTS ====================
