@@ -1253,6 +1253,8 @@ html_template = """
    NAV DROPDOWN — STABLE VERSION
    =============================== */
 
+
+
 /* main nav layout stays intact */
 header nav ul {
   display: flex;
@@ -1341,10 +1343,15 @@ header {
 
 
 
-          
-              .kpi-subsection.hidden {
-                      display: none;
+.kpi-subsection.hidden {
+       display: none;
                   }
+
+
+.hidden {
+  display: none !important;
+}
+
 
 
 
@@ -1398,19 +1405,22 @@ function setActiveNav(sectionId) {
 }
 
 
+
 function showSection(sectionId) {
   const sections = document.getElementsByClassName('section');
   console.log("Sections found:", sections);
 
-  // hide all sections
+  // hide all sections (use ONE system: .hidden)
   for (let i = 0; i < sections.length; i++) {
-    sections[i].style.display = 'none';
+    sections[i].classList.add('hidden');
+    sections[i].style.display = ''; // clear any old inline display
   }
 
   // show selected section
   const selectedSection = document.getElementById(sectionId);
   if (selectedSection) {
-    selectedSection.style.display = 'block';
+    selectedSection.classList.remove('hidden');
+    selectedSection.style.display = ''; // ensure no inline conflicts
   }
 
   // highlight main nav + leaf (single source of truth)
@@ -1450,9 +1460,14 @@ function showSection(sectionId) {
  * subSelector: CSS selector for all subsections inside that section (ex: ".kpi-subsection")
  * subId: the specific subsection id to show (ex: "kpi-vessel")
  */
+
 function showSubSection(parentSectionId, subSelector, subId) {
   // 1) ensure main section visible + active nav correct
   showSection(parentSectionId);
+
+  // ✅ force parent visible (no inline display leftovers)
+  const parent = document.getElementById(parentSectionId);
+  if (parent) parent.classList.remove('hidden');
 
   // 2) hide all subsections
   document.querySelectorAll(subSelector).forEach(sec => sec.classList.add('hidden'));
