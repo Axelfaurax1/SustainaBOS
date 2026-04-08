@@ -1690,31 +1690,21 @@ html_template = """
             <li><a id="nav-welcome" href="#" onclick="showSection('welcome')">Home</a></li>
             <li><a id="nav-list" href="#" onclick="showSection('list')">List</a></li>
             <li><a id="nav-apps" href="#" onclick="showSection('apps')">Apps</a></li>
-
-            
                              
+            
                              <li class="nav-dropdown">
-                              #
-                              KPIs ▾
-                              </a>
+                                   <a href="#" onclick="showSection('analytics')">
+                                  KPIs
+                                   </a>
 
-                              <ul class="nav-dropdown-menu">
-                               
-                              <li>
-                              <a href="#" onclick="showKpiSub('kpi-global')">Global</a>
-                              </li>
-                              <li>
-                              <a href="#" onclick="showKpiSub('kpi-vessel')">Vessel specific</a>
-                              </li>
-                               <li>
-                               <a href="#" onclick="showKpiSub('kpi-compare')">2024 vs 2025</a>
-                                </li>
-                               <li>
-                               <a href="#" onclick="showKpiSub('kpi-old')">Old analytics</a>
+                                  <ul class="nav-dropdown-menu">
+                                  <li><a href="#" onclick="showKpiSub('kpi-global')">Global</a></li>
+                                  <li><a href="#" onclick="showKpiSub('kpi-vessel')">Vessel specific</a></li>
+                                  <li><a href="#" onclick="showKpiSub('kpi-compare')">2024 vs 2025</a></li>
+                                  <li><a href="#" onclick="showKpiSub('kpi-old')">Old analytics</a></li>
+                                  </ul>
                                </li>
 
-                               </ul>
-                                </li>
 
 
 
