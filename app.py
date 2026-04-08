@@ -1248,69 +1248,83 @@ html_template = """
          background: var(--brand-green);
       }
 
-      /* ===============================
-              Generic nav dropdown component
+
+/* ===============================
+   NAV DROPDOWN — STABLE VERSION
    =============================== */
 
-              .nav-dropdown {
-              position: relative;
-              }
-
-
-               .nav-dropdown > a {
-  font-family: inherit;
-  font-weight: 600;
- font-size: 15px;
-  color: #5b2b82; /* violet like Apps / Docs */
+/* main nav layout stays intact */
+header nav ul {
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
-               .nav-dropdown-menu {
+/* dropdown parent */
+header nav ul li.nav-dropdown {
+  position: relative;
+}
+
+/* KPIs link (same look as others) */
+header nav ul li.nav-dropdown > a {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: #5b2b82;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* dropdown menu — REMOVE from nav flow */
+header nav ul li.nav-dropdown > ul.nav-dropdown-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 4px); /*  juste sous le header */
+  top: 100%;
   left: 0;
 
-  background: #e9fbe8; /*  même vert que le header */
-  border-radius: 10px;
+  /* ✅ reset inherited nav styles */
+  flex-direction: column;
+  align-items: stretch;
 
-  list-style: none;
-  margin: 0;
+  background: #e9fbe8;
+  border-radius: 8px;
+
   padding: 6px 0;
+  margin: 0;
+  list-style: none;
   min-width: 190px;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-  z-index: 2000;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  z-index: 9999;
 }
 
-                 .nav-dropdown-menu li {
-  padding: 0; /* padding géré par le <a> */
+/* show on hover */
+header nav ul li.nav-dropdown:hover > ul.nav-dropdown-menu {
+  display: block;
 }
 
-                  .nav-dropdown-menu li a {
+/* dropdown items */
+header nav ul li.nav-dropdown > ul.nav-dropdown-menu li {
+  width: 100%;
+}
+
+/* dropdown links */
+header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a {
   display: block;
   padding: 8px 16px;
 
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  color: #2e7d32; /*  vert comme Home */
-
-  text-decoration: none; 
-}
-  
-             .nav-dropdown-menu li a:hover {
-  background: rgba(46,125,50,0.12);
   color: #2e7d32;
+
+  text-decoration: none;
+  white-space: nowrap;
 }
 
+header nav ul li.nav-dropdown > ul.nav-dropdown-menu li a:hover {
+  background: rgba(46,125,50,0.12);
+}
 
-/* ✅ Hover logic (no JS) */
-              .nav-dropdown:hover .nav-dropdown-menu {
-  display: block;
-          }
 
           
               .kpi-subsection.hidden {
