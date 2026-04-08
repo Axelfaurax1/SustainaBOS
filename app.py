@@ -2145,8 +2145,8 @@ html_template = """
           </div>
 
           <div class="kpi-simple-card">
-            <h3>Avg. Vessels in Operation</h3>
-            <div class="kpi-simple-value">71</div>
+            <h3>Avg. Daily CO₂e by Vessel</h3>
+            <div class="kpi-simple-value">12.04 t</div>
           </div>
 
           <div class="kpi-simple-card">
@@ -2172,13 +2172,13 @@ html_template = """
               <div class="chart-counter"
                    data-target="{{ co2_2025_mean|round(0) }}"
                    data-suffix=" t">0</div>
-              <div class="chart-subtitle">Mean TFC</div>
+              <div class="chart-subtitle">Mean CO₂e</div>
             </div>
             <div>
               <div class="chart-counter"
                    data-target="{{ co2_2025_goal|round(0) }}"
                    data-suffix=" t">0</div>
-              <div class="chart-subtitle">Mean TFC Goal</div>
+              <div class="chart-subtitle">CO₂e Goal</div>
             </div>
           </div>
           <canvas id="tfcMeanGoal2025Chart"></canvas>
@@ -2749,7 +2749,7 @@ html_template = """
             
                   borderColor: "#2e7d32",
                   backgroundColor: "rgba(46,125,50,0.12)",
-,
+
             fill: true,
             tension: 0.25,
             borderWidth: 2,
