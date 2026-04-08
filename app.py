@@ -518,7 +518,7 @@ html_template = """
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #E8F5E9; margin: 0; padding: 0; }
-        .container { width: 80%; margin: auto; overflow: hidden; }
+        .container { width: 80%; margin: auto; overflow: visible; }
         header { background: #D0E8D0; color: #800080; padding-top: 20px; min-height: auto; border-bottom: #800080 2px solid; }
         header a { color: #800080; text-decoration: none; text-transform: none; font-size: 16px; font-weight: bold;}
         header ul { padding: 0; list-style: none; }
@@ -534,7 +534,7 @@ html_template = """
         th { background-color: #0779e4; color: white; }
         h2 { color: #333; }
         .hidden { display: none; }
-        .show { display: table-row-group; }
+        .show { display: block; }
         
         table {
         width: 100%;
