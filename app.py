@@ -2140,8 +2140,8 @@ html_template = """
 
         <div class="kpi-grid">
           <div class="kpi-simple-card">
-            <h3><h3>CO₂e 2025</h3></h3>
-            <div class="kpi-simple-value">312160 tCO₂e t</div>
+            <h3>CO₂e 2025</h3>
+            <div class="kpi-simple-value">312160 t</div>
           </div>
 
           <div class="kpi-simple-card">
