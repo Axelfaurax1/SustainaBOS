@@ -1371,88 +1371,102 @@ header {
     `      ;
         }
 
-        function showSection(sectionId) {
-            var sections = document.getElementsByClassName('section');
-            var navItems = document.querySelectorAll('a[id^="nav-"]');  
-            // selects all nav items by id
-            console.log("Sections found:", sections);
-            for (var i = 0; i < sections.length; i++) {
-                sections[i].style.display = 'none';
-            }
-
-            // Remove highlight from all nav items
-                navItems.forEach(item => {
-        item.classList.remove('active-nav');
-                // Optional: remove any icons previously added
-                var icon = item.querySelector('img');
-                if (icon) item.removeChild(icon);
-            });
-
-            // Show the selected section
-            var selectedSection = document.getElementById(sectionId);
-            if (selectedSection) {
-                   selectedSection.style.display = 'block';
-            }
-
-            // Sinon : document.getElementById(sectionId).style.display = 'block';
-
-            // Show instructions if it's the 'list' or 'contact' section
-            if (sectionId === 'list') {
-                  const box = document.getElementById('instruction-box');
-                  if (box) {
-                     box.style.display = 'block';
-                     box.style.opacity = '1';
-                     box.style.transition = 'opacity 1s ease';
-                     setTimeout(() => {
-                        box.style.opacity = '0';
-                     }, 3000); // Fade out after 3 seconds
-                  }
-            }
-            if (sectionId === 'contact') {
-                  const box = document.getElementById('instruction-box-nul');
-                  if (box) {
-                     box.style.display = 'block';
-                     box.style.opacity = '1';
-                     box.style.transition = 'opacity 1s ease';
-                     setTimeout(() => {
-                        box.style.opacity = '0';
-                     }, 3000); // Fade out after 3 seconds
-                  }
-            }
-
-            // 👉 Add Power BI iframe only when user navigates to analytics
-            if (sectionId === 'analytics') {
-                loadPowerBIReport();
-            }
-
-            // Add highlight or icon to active section
-            var activeNav = document.getElementById('nav-' + sectionId);
-            activeNav.classList.add('active-nav');
-
-            // Add green_leaf icon
-            let leaf = document.createElement('img');
-            leaf.src = '/static/green_leaf.png';  // adjust path if needed
-            leaf.alt = 'leaf';
-            leaf.style.height = '16px';
-            leaf.style.marginLeft = '5px';
-            activeNav.appendChild(leaf);
         
+function setActiveNav(sectionId) {
+  const navItems = document.querySelectorAll('a[id^="nav-"]');
 
-        }
-        
-        function showKpiSub(id) {
-                      // 1) afficher la page KPI
-                      showSection("analytics");
+  // remove active + remove leaf from all
+  navItems.forEach(item => {
+    item.classList.remove('active-nav');
+    const icon = item.querySelector('img.nav-leaf');
+    if (icon) icon.remove();
+  });
 
-                      // 2) cacher toutes les sous-sections KPI
-                      document.querySelectorAll(".kpi-subsection").forEach(sec => {
-                           sec.classList.add("hidden");
-                          });
+  const activeNav = document.getElementById('nav-' + sectionId);
+  if (!activeNav) return;
 
-                      // 3) afficher la bonne
-                      const target = document.getElementById(id);
-                      if (target) target.classList.remove("hidden");
-                     }
+  activeNav.classList.add('active-nav');
+
+  // add leaf icon
+  const leaf = document.createElement('img');
+  leaf.className = 'nav-leaf';
+  leaf.src = '/static/green_leaf.png';
+  leaf.alt = 'leaf';
+  leaf.style.height = '16px';
+  leaf.style.marginLeft = '5px';
+  activeNav.appendChild(leaf);
+}
+
+
+function showSection(sectionId) {
+  const sections = document.getElementsByClassName('section');
+  console.log("Sections found:", sections);
+
+  // hide all sections
+  for (let i = 0; i < sections.length; i++) {
+    sections[i].style.display = 'none';
+  }
+
+  // show selected section
+  const selectedSection = document.getElementById(sectionId);
+  if (selectedSection) {
+    selectedSection.style.display = 'block';
+  }
+
+  // highlight main nav + leaf (single source of truth)
+  setActiveNav(sectionId);
+
+  // optional: instruction boxes (keep your behavior)
+  if (sectionId === 'list') {
+    const box = document.getElementById('instruction-box');
+    if (box) {
+      box.style.display = 'block';
+      box.style.opacity = '1';
+      box.style.transition = 'opacity 1s ease';
+      setTimeout(() => { box.style.opacity = '0'; }, 3000);
+    }
+  }
+
+  if (sectionId === 'contact') {
+    const box = document.getElementById('instruction-box-nul');
+    if (box) {
+      box.style.display = 'block';
+      box.style.opacity = '1';
+      box.style.transition = 'opacity 1s ease';
+      setTimeout(() => { box.style.opacity = '0'; }, 3000);
+    }
+  }
+
+  // PowerBI only when analytics
+  if (sectionId === 'analytics') {
+    loadPowerBIReport();
+  }
+}
+
+
+/**
+ * Generic dropdown handler (KPI now, other dropdowns later)
+ * parentSectionId: the main section to show (ex: "analytics")
+ * subSelector: CSS selector for all subsections inside that section (ex: ".kpi-subsection")
+ * subId: the specific subsection id to show (ex: "kpi-vessel")
+ */
+function showSubSection(parentSectionId, subSelector, subId) {
+  // 1) ensure main section visible + active nav correct
+  showSection(parentSectionId);
+
+  // 2) hide all subsections
+  document.querySelectorAll(subSelector).forEach(sec => sec.classList.add('hidden'));
+
+  // 3) show requested subsection
+  const target = document.getElementById(subId);
+  if (target) target.classList.remove('hidden');
+}
+
+
+// ✅ KPI dropdown uses generic function
+function showKpiSub(subId) {
+  showSubSection('analytics', '.kpi-subsection', subId);
+}
 
 
         
@@ -2408,11 +2422,11 @@ header {
       </div>
       </div>
 
-      <div id="kpi-vessel" class="kpi-subsection hidden">
+      <div id="kpi-compare" class="kpi-subsection hidden">
       </div>
 
           
-      <div id="kpi-vessel" class="kpi-subsection hidden">
+      <div id="kpi-old" class="kpi-subsection hidden">
 
           <br>
           <br>
